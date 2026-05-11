@@ -949,4 +949,64 @@ git status
 
 ---
 
-**最後更新**: 2026-05-11 15:30:00 UTC
+## 🚀 **Vercel 部署設置指南** (2026-05-11 新增)
+
+### ✅ **已完成的工作**
+
+1. **GitHub 倉庫創建** ✅
+   - 倉庫名稱: `skills-assistant`
+   - 倉庫地址: `https://github.com/2015hdwl-Claw/skills-assistant`
+   - 代碼已推送: 最新版本已上傳
+
+2. **本地環境設置** ✅
+   - Git 遠程倉庫已配置
+   - 自動化腳本已創建
+   - 專案掃描系統已驗證
+
+### 🔗 **Vercel 連接步驟**
+
+#### **步驟 1: 登入 Vercel**
+1. 訪問 [https://vercel.com](https://vercel.com)
+2. 使用 GitHub 帳號登入 (`2015hdwl-Claw`)
+3. 授權 Vercel 訪問 GitHub 倉庫
+
+#### **步驟 2: 導入專案**
+1. 點擊 **"Add New Project"**
+2. 選擇 **"Import Git Repository"**
+3. 找到並選擇 `skills-assistant` 倉庫
+4. 點擊 **"Import"**
+
+#### **步驟 3: 配置專案設置**
+```
+Project Name: skills-assistant
+Framework Preset: Other
+Root Directory: ./
+Build Command: (留空，靜態網站)
+Output Directory: ./
+```
+
+#### **步驟 4: 部署**
+1. 點擊 **"Deploy"**
+2. 等待 1-2 分鐘完成部署
+3. 獲得部署 URL: `https://skills-assistant.vercel.app`
+
+### 🎯 **部署完成後的功能**
+
+#### **自動化更新流程**
+```
+本地專案變更 → auto-update-and-deploy.bat → GitHub → Vercel 自動部署 → 最新版本上線
+```
+
+#### **主要訪問地址**
+- **主儀表板**: `https://skills-assistant.vercel.app/all-projects-progress.html`
+- **專案詳情**: `https://skills-assistant.vercel.app/project-detail.html`
+- **首頁**: `https://skills-assistant.vercel.app/`
+
+### 📊 **當前監控專案**
+- ✅ **升學大師** - 65% 進度 (Phase 3 開發執行)
+- ✅ **專案規劃大師** - 40% 進度 (Phase 3，剛更新的數據)
+- ✅ **社群經營大師** - 100% 完成 (Phase 5)
+
+---
+
+**最後更新**: 2026-05-11 16:00:00 UTC

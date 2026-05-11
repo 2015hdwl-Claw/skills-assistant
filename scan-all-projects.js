@@ -613,11 +613,25 @@ class AllProjectsScanner {
     async generateIndex() {
         console.log('\n📝 生成專案索引檔案...');
 
+        // 精簡輸出：只保留儀表板需要的數據
+        const slimProjects = this.projectsFound.map(p => ({
+            id: p.id,
+            name: p.name,
+            displayName: p.displayName,
+            type: p.type,
+            currentPhase: p.currentPhase,
+            progress: p.progress,
+            phases: p.phases,
+            lastUpdated: p.lastUpdated,
+            description: p.description ? (typeof p.description === 'string' ? p.description : p.description.substring?.(0, 200)) : null,
+            status: p.status,
+            sourceFiles: p.sourceFiles || []
+        }));
+
         const indexData = {
             generatedAt: new Date().toISOString(),
-            totalProjects: this.projectsFound.length,
-            projects: this.projectsFound,
-            errors: this.errors,
+            totalProjects: slimProjects.length,
+            projects: slimProjects,
             scanPath: PROJECTS_BASE_PATH
         };
 

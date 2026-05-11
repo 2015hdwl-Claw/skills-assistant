@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>格式轉換測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .success { border-color: #10b981; background: #ecfdf5; }
+        .error { border-color: #ef4444; background: #fef2f2; }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover { background: #2563eb; }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 專案格式轉換測試</h1>
+
+        <div>
+            <button class="button" onclick="testSocialFormat()">測試 Social 格式轉換</button>
+            <button class="button" onclick="testAdmissionFormat()">測試 Admission 格式</button>
+            <button class="button" onclick="testBothFormats()">測試兩種格式</button>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script src="project-file-loader.js"></script>
+    <script src="project-scanner.js"></script>
+    <script>
+        const loader = new ProjectFileLoader();
+        const scanner = new RealProjectScanner();
+
+        function addResult(title, success, message, data = null) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+
+            let html = `<h3>${success ? '✅' : '❌'} ${title}</h3>`;
+            html += `<p>${message}</p>`;
+
+            if (data) {
+                html += `<h4>轉換結果:</h4>`;
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+
+            resultDiv.innerHTML = html;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testSocialFormat() {
+            document.getElementById('testResults').innerHTML = '<p>🔄 測試中...</p>';
+
+            try {
+                // 模擬 social 格式資料
+                const socialData = {
+                    "project_name": "social-master",
+                    "project_code": "social",
+                    "last_updated": "2026-05-03T22:30:00Z",
+                    "current_phase": "Phase 3",
+                    "overall_progress": {
+                        "phase_1": {
+                            "name": "構思與確認",
+                            "status": "completed",
+                            "progress_percentage": 100,
+                            "start_date": "2026-04-27",
+                            "end_date": "2026-05-10"
+                        },
+                        "phase_2": {
+                            "name": "規劃與設計",
+                            "status": "in_progress",
+                            "progress_percentage": 30,
+                            "start_date": "2026-05-11"
+                        }
+                    }
+                };
+
+                // 測試格式轉換
+                const normalized = loader.normalizeProgressData(socialData);
+
+                if (normalized) {
+                    addResult('Social 格式轉換', true, '成功轉換 social 格式為標準格式', normalized);
+                } else {
+                    addResult('Social 格式轉換', false, '格式轉換失敗');
+                }
+
+            } catch (error) {
+                addResult('Social 格式轉換', false, `錯誤: ${error.message}`);
+            }
+        }
+
+        async function testAdmissionFormat() {
+            try {
+                // 模擬 admission-master 格式資料
+                const admissionData = {
+                    "project_info": {
+                        "name": "admission-master",
+                        "current_phase": "PHASE_4",
+                        "last_updated": "2026-05-07T00:00:00.000Z"
+                    },
+                    "phases": {
+                        "PHASE_1": {
+                            "name": "構思與確認",
+                            "status": "completed",
+                            "progress_percentage": 100,
+                            "checklist_completion": "6/6"
+                        },
+                        "PHASE_4": {
+                            "name": "成長與驗證",
+                            "status": "in_progress",
+                            "progress_percentage": 90,
+                            "checklist_completion": "6/7"
+                        }
+                    }
+                };
+
+                // 測試格式識別
+                const normalized = loader.normalizeProgressData(admissionData);
+
+                if (normalized) {
+                    addResult('Admission 格式識別', true, '成功識別標準格式', normalized);
+                } else {
+                    addResult('Admission 格式識別', false, '格式識別失敗');
+                }
+
+            } catch (error) {
+                addResult('Admission 格式識別', false, `錯誤: ${error.message}`);
+            }
+        }
+
+        async function testBothFormats() {
+            document.getElementById('testResults').innerHTML = '<p>🔄 測試中...</p>';
+
+            try {
+                // 測試掃描真實檔案
+                const projects = await scanner.scanAllProjects();
+
+                if (projects.length > 0) {
+                    addResult('真實檔案掃描', true, `成功掃描 ${projects.length} 個專案`, projects);
+
+                    // 顯示每個專案的詳細資訊
+                    projects.forEach(project => {
+                        addResult(`專案: ${project.displayName}`, true,
+                            `當前階段: ${project.currentPhase}, 整體進度: ${project.progress}%`, project);
+                    });
+                } else {
+                    addResult('真實檔案掃描', false, '未找到任何專案檔案');
+                }
+
+            } catch (error) {
+                addResult('真實檔案掃描', false, `錯誤: ${error.message}`);
+            }
+        }
+
+        // 頁面載入時自動測試
+        window.addEventListener('load', () => {
+            setTimeout(testSocialFormat, 500);
+        });
+    </script>
+</body>
+</html>

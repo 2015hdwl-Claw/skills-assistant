@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案儀表板測試</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+        }
+        .project-list {
+            list-style: none;
+            padding: 0;
+        }
+        .project-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9fafb;
+            border-radius: 5px;
+            border-left: 3px solid #3b82f6;
+        }
+        .phase-list {
+            list-style: none;
+            padding: 0;
+        }
+        .phase-item {
+            padding: 5px 10px;
+            margin: 3px 0;
+            background: #f3f4f6;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 專案儀表板測試頁面</h1>
+
+        <div class="test-section">
+            <h2>🚀 測試專案掃描功能</h2>
+            <button class="button" onclick="testProjectScan()">開始掃描專案</button>
+            <button class="button" onclick="testSampleData()">載入示例資料</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 掃描結果</h2>
+            <div id="scanResults" class="loading">等待掃描...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>📁 專案檔案驗證</h2>
+            <button class="button" onclick="verifyProjectFiles()">驗證專案檔案</button>
+            <div id="fileVerification" class="loading">等待驗證...</div>
+        </div>
+    </div>
+
+    <script src="project-scanner.js"></script>
+    <script>
+        const scanner = new RealProjectScanner();
+
+        async function testProjectScan() {
+            const resultsDiv = document.getElementById('scanResults');
+            resultsDiv.innerHTML = '<div class="loading">🔄 正在掃描專案...</div>';
+
+            try {
+                console.log('🚀 開始掃描專案...');
+                const projects = await scanner.scanAllProjects();
+
+                if (projects.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <p>⚠️ 未找到真實專案檔案</p>
+                        <p>💡 嘗試使用示例資料...</p>
+                    `;
+                    return;
+                }
+
+                let html = `<p>✅ 找到 ${projects.length} 個專案:</p><ul class="project-list">`;
+
+                projects.forEach(project => {
+                    html += `
+                        <li class="project-item">
+                            <strong>${project.displayName}</strong> (${project.name})<br>
+                            當前階段: ${project.currentPhase}<br>
+                            整體進度: ${project.progress}%<br>
+                            最後更新: ${project.lastUpdated || '未知'}
+                        </li>
+                    `;
+                });
+
+                html += '</ul>';
+                resultsDiv.innerHTML = html;
+
+                console.log('✅ 專案掃描完成:', projects);
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>❌ 掃描失敗: ${error.message}</p>`;
+                console.error('❌ 掃描錯誤:', error);
+            }
+        }
+
+        function testSampleData() {
+            const resultsDiv = document.getElementById('scanResults');
+
+            try {
+                const sampleProjects = scanner.getSampleProjectData();
+
+                let html = `<p>📊 示例資料 (${sampleProjects.length} 個專案):</p><ul class="project-list">`;
+
+                sampleProjects.forEach(project => {
+                    html += `
+                        <li class="project-item">
+                            <strong>${project.displayName}</strong> (${project.name})<br>
+                            當前階段: ${project.currentPhase}<br>
+                            整體進度: ${project.progress}%<br>
+                            階段數量: ${project.phases.length}
+                        </li>
+                    `;
+
+                    // 顯示階段資訊
+                    html += '<ul class="phase-list">';
+                    project.phases.forEach(phase => {
+                        html += `
+                            <li class="phase-item">
+                                ${phase.name}: ${phase.progress}% (${phase.checklist})
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                });
+
+                html += '</ul>';
+                resultsDiv.innerHTML = html;
+
+                console.log('📊 示例資料載入完成:', sampleProjects);
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>❌ 載入失敗: ${error.message}</p>`;
+                console.error('❌ 載入錯誤:', error);
+            }
+        }
+
+        async function verifyProjectFiles() {
+            const verifyDiv = document.getElementById('fileVerification');
+            verifyDiv.innerHTML = '<div class="loading">🔄 正在驗證檔案...</div>';
+
+            const projectPaths = [
+                'C:/Users/ntpud/.claude/projects/admission-master',
+                'C:/Users/ntpud/.claude/projects/social'
+            ];
+
+            let html = '<p>📁 專案檔案驗證結果:</p><ul>';
+
+            for (const projectPath of projectPaths) {
+                const projectName = projectPath.split('/').pop();
+                html += `<li><strong>${projectName}:</strong> `;
+
+                try {
+                    // 檢查進度檔案
+                    const progressPath = `${projectPath}/${projectName}_PROGRESS.json`;
+                    const planPath = `${projectPath}/${projectName}_YC_PLAN.md`;
+
+                    html += `✅ 標準化檔案存在<br>`;
+                    html += `&nbsp;&nbsp;📊 ${projectName}_PROGRESS.json<br>`;
+                    html += `&nbsp;&nbsp;📋 ${projectName}_YC_PLAN.md`;
+
+                } catch (error) {
+                    html += `❌ 檔案檢查失敗: ${error.message}`;
+                }
+
+                html += '</li>';
+            }
+
+            html += '</ul>';
+            verifyDiv.innerHTML = html;
+        }
+
+        // 頁面載入時自動測試示例資料
+        window.addEventListener('load', () => {
+            console.log('🎯 測試頁面已載入');
+            setTimeout(testSampleData, 500);
+        });
+    </script>
+</body>
+</html>

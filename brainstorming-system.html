@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YC Brainstorming 系統 - 多角色專案規劃</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .panel h3 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .role-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .role-btn:hover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .role-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .role-btn .role-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .role-btn .role-name {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .brainstorming-input {
+            margin-bottom: 20px;
+        }
+
+        .brainstorming-input textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .brainstorming-input textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .phase-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .phase-indicator h2 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .phase-indicator .yc-framework {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .discussion-thread {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .message.ceo {
+            border-left-color: #dc3545;
+            background: #ffe6e6;
+        }
+
+        .message.engineering {
+            border-left-color: #28a745;
+            background: #e6ffe6;
+        }
+
+        .message.design {
+            border-left-color: #ffc107;
+            background: #fffbe6;
+        }
+
+        .message.devex {
+            border-left-color: #17a2b8;
+            background: #e6f7ff;
+        }
+
+        .message .role {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .message .content {
+            line-height: 1.6;
+        }
+
+        .message .timestamp {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .status-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .yc-timeline {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .yc-phase {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .yc-phase.active {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+        }
+
+        .yc-phase .phase-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .yc-phase .phase-info h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .yc-phase .phase-info p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .skills-recommendation {
+            background: #f0f8ff;
+            border: 2px solid #4169e1;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .skills-recommendation h4 {
+            color: #4169e1;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .skill-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #4169e1;
+        }
+
+        .skill-item .skill-name {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #4169e1;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .skill-item .skill-usage {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .skill-item .skill-examples {
+            font-size: 0.85em;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .skill-item.hot-skill {
+            background: #fff8e6;
+            border-left: 3px solid #ff8c00;
+        }
+
+        .skill-item.hot-skill .skill-name {
+            color: #ff8c00;
+        }
+
+        .output-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .output-section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .plan-preview {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 YC Brainstorming 系統</h1>
+            <p>多角色專案規劃 + YC 標準流程 + 自動計畫書產出</p>
+        </div>
+
+        <div class="phase-indicator">
+            <div id="currentPhaseDisplay">
+                <h2>🎯 Phase 1: 構思與確認</h2>
+                <p class="yc-framework">YC 標準新創流程 • Idea Validation</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左側：角色選擇 -->
+            <div class="panel">
+                <h3>👥 參與角色</h3>
+                <div class="role-selector">
+                    <div class="role-btn active" data-role="ceo" onclick="selectRole('ceo')">
+                        <div class="role-icon">💼</div>
+                        <div class="role-name">CEO</div>
+                    </div>
+                    <div class="role-btn" data-role="engineering" onclick="selectRole('engineering')">
+                        <div class="role-icon">🔧</div>
+                        <div class="role-name">工程</div>
+                    </div>
+                    <div class="role-btn" data-role="design" onclick="selectRole('design')">
+                        <div class="role-icon">🎨</div>
+                        <div class="role-name">設計</div>
+                    </div>
+                    <div class="role-btn" data-role="devex" onclick="selectRole('devex')">
+                        <div class="role-icon">👤</div>
+                        <div class="role-name">用戶體驗</div>
+                    </div>
+                </div>
+
+                <div class="status-panel">
+                    <h4>📊 討論狀態</h4>
+                    <div class="status-item">
+                        <span class="status-label">當前角色:</span>
+                        <span class="status-value" id="currentRole">CEO</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">發言次數:</span>
+                        <span class="status-value" id="contributionCount">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">討論時間:</span>
+                        <span class="status-value" id="discussionTime">0 分鐘</span>
+                    </div>
+                </div>
+
+                <div class="yc-timeline" id="ycTimeline">
+                    <h4>📋 YC 標準流程</h4>
+                    <div class="yc-phase active">
+                        <div class="phase-number">1</div>
+                        <div class="phase-info">
+                            <h4>構思與確認</h4>
+                            <p>想法驗證 • 市場分析</p>
+                        </div>
+                    </div>
+                    <div class="yc-phase">
+                        <div class="phase-number">2</div>
+                        <div class="phase-info">
+                            <h4>規劃與設計</h4>
+                            <p>產品規格 • 技術架構</p>
+                        </div>
+                    </div>
+                    <div class="yc-phase">
+                        <div class="phase-number">3</div>
+                        <div class="phase-info">
+                            <h4>開發執行</h4>
+                            <p>MVP 開發 • 用戶測試</p>
+                        </div>
+                    </div>
+                    <div class="yc-phase">
+                        <div class="phase-number">4</div>
+                        <div class="phase-info">
+                            <h4>成長與驗證</h4>
+                            <p>數據分析 • 迭代改進</p>
+                        </div>
+                    </div>
+                    <div class="yc-phase">
+                        <div class="phase-number">5</div>
+                        <div class="phase-info">
+                            <h4>擴展與規模</h4>
+                            <p>市場推廣 • 團隊成長</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中間：討論區 -->
+            <div class="panel">
+                <h3>💬 多角色討論區</h3>
+                <div class="brainstorming-input">
+                    <textarea id="roleInput" placeholder="以當前角色身份提出你的觀點和建議..."></textarea>
+                </div>
+                <button class="action-btn" onclick="addContribution()">
+                    🎤 發表觀點
+                </button>
+
+                <div class="discussion-thread" id="discussionThread">
+                    <!-- 動態生成的討論內容 -->
+                    <div class="message ceo">
+                        <div class="role">💼 CEO 視角</div>
+                        <div class="content">歡迎大家參加這次 brainstorming 會議。我們今天的主題是規劃新的專案方向。請各位從自己的專業角度提供意見。</div>
+                        <div class="timestamp">剛剛</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：行動與產出 -->
+            <div class="panel">
+                <h3>🎯 行動選項</h3>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="switchRole()">
+                        🔄 切換角色
+                    </button>
+                    <button class="action-btn" onclick="pauseDiscussion()">
+                        ⏸️ 暫停討論
+                    </button>
+                    <button class="action-btn" onclick="generatePlan()">
+                        📝 產生計畫書
+                    </button>
+                </div>
+
+                <div class="status-panel">
+                    <h4>⚡ 快速動作</h4>
+                    <button class="action-btn" style="width: 100%; margin: 5px 0;" onclick="askRoleQuestion()">
+                        ❓ 詢問特定角色
+                    </button>
+                    <button class="action-btn" style="width: 100%; margin: 5px 0;" onclick="summarizeDiscussion()">
+                        📋 討論總結
+                    </button>
+                    <button class="action-btn" style="width: 100%; margin: 5px 0;" onclick="identifyRisks()">
+                        ⚠️ 風險識別
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 產出區 -->
+        <div class="output-section" id="outputSection" style="display: none;">
+            <h2>📝 YC 標準計畫書產出</h2>
+            <div class="plan-preview" id="planPreview"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="action-btn" onclick="exportPlan()">
+                    📤 匯出計畫書
+                </button>
+                <button class="action-btn" onclick="saveToBackend()">
+                    💾 儲存到後端
+                </button>
+                <button class="action-btn" onclick="continueToNextPhase()">
+                    ➡️ 進入 Phase 2
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局狀態
+        const brainstormingState = {
+            currentRole: 'ceo',
+            contributions: [],
+            startTime: Date.now(),
+            isPaused: false,
+            phase: 1,
+            phaseName: 'PHASE_1',
+            versionHistory: [],
+            currentVersion: null,
+            isRestarting: false
+        };
+
+        // 版本控制系統
+        const brainstormingVersionControl = {
+            versions: [],
+            currentVersion: null,
+
+            createVersion: function(phase, reason, previousContributions) {
+                const version = {
+                    id: this.generateVersionId(),
+                    timestamp: new Date().toISOString(),
+                    phase: phase,
+                    reason: reason,
+                    contributions: previousContributions,
+                    status: 'active',
+                    trigger: this.identifyTrigger(reason),
+                    impact: this.assessImpact(phase, reason)
+                };
+
+                this.versions.push(version);
+                this.currentVersion = version.id;
+                brainstormingState.versionHistory = this.versions;
+                brainstormingState.currentVersion = version.id;
+
+                return version;
+            },
+
+            generateVersionId: function() {
+                const date = new Date();
+                const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+                const random = Math.random().toString(36).substring(2, 6);
+                return `v${dateStr}_${random}`;
+            },
+
+            identifyTrigger: function(reason) {
+                const triggers = {
+                    '市場變化': 'market_change',
+                    '技術困難': 'technical_challenge',
+                    '新想法': 'new_idea',
+                    '用戶反饋': 'user_feedback',
+                    '競爭變化': 'competition_change',
+                    '資源限制': 'resource_constraint',
+                    '團隊變化': 'team_change'
+                };
+
+                for (const [keyword, type] of Object.entries(triggers)) {
+                    if (reason.includes(keyword)) {
+                        return type;
+                    }
+                }
+                return 'other';
+            },
+
+            assessImpact: function(phase, reason) {
+                const trigger = this.identifyTrigger(reason);
+                // 簡化的影響評估
+                if (['市場變化', '技術困難', '用戶反饋'].includes(trigger)) {
+                    return 'high';
+                } else if (['新想法', '競爭變化'].includes(trigger)) {
+                    return 'medium';
+                }
+                return 'low';
+            },
+
+            getVersionHistory: function() {
+                return this.versions.slice().reverse();
+            }
+        };
+
+        // YC 階段定義
+        const ycPhases = {
+            1: { name: 'PHASE_1', title: '構思與確認', subtitle: 'Idea Validation' },
+            2: { name: 'PHASE_2', title: '規劃與設計', subtitle: 'Product & Planning' },
+            3: { name: 'PHASE_3', title: '開發執行', subtitle: 'Development' },
+            4: { name: 'PHASE_4', title: '成長與驗證', subtitle: 'Growth & Validation' },
+            5: { name: 'PHASE_5', title: '擴展與規模', subtitle: 'Scale' }
+        };
+
+        const roleDefinitions = {
+            ceo: {
+                name: 'CEO',
+                icon: '💼',
+                focus: '商業模式、市場機會、競爭優勢',
+                questions: [
+                    '這個產品的目標市場是什麼？規模有多大？',
+                    '我們的商業模式如何盈利？',
+                    '競爭對手是誰？我們的差異化優勢在哪裡？',
+                    '這個想法的市場時機是否合適？'
+                ]
+            },
+            engineering: {
+                name: '工程',
+                icon: '🔧',
+                focus: '技術實現、架構設計、開發可行性',
+                questions: [
+                    '這個產品的核心技術挑戰是什麼？',
+                    '我們需要什麼技術棧來實現？',
+                    '開發時間和資源需求如何？',
+                    '技術債務和可擴展性考慮'
+                ]
+            },
+            design: {
+                name: '設計',
+                icon: '🎨',
+                focus: '使用者體驗、介面設計、視覺呈現',
+                questions: [
+                    '目標用戶的使用場景是什麼？',
+                    '如何設計直觀的用戶體驗？',
+                    '產品的視覺風格應該如何？',
+                    '無障礙和可訪問性考慮'
+                ]
+            },
+            devex: {
+                name: '用戶體驗',
+                icon: '👤',
+                focus: '用戶需求、行為模式、滿意度',
+                questions: [
+                    '用戶當前如何解決這個問題？',
+                    '他們在使用現有解決方案時遇到什麼困難？',
+                    '什麼時候、什麼情況下會使用這個產品？',
+                    '用戶願意為這個產品付費嗎？'
+                ]
+            }
+        };
+
+        // 選擇角色
+        function selectRole(role) {
+            brainstormingState.currentRole = role;
+
+            // 更新 UI
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-role="${role}"]`).classList.add('active');
+
+            document.getElementById('currentRole').textContent = roleDefinitions[role].name;
+
+            // 更新輸入框提示
+            const roleDef = roleDefinitions[role];
+            document.getElementById('roleInput').placeholder =
+                `以 ${roleDef.name} 身份發言...\n\n關注重點：${roleDef.focus}\n\n參考問題：\n• ${roleDef.questions.join('\n• ')}`;
+        }
+
+        // 新增：選擇階段功能
+        function selectPhase(phaseNumber) {
+            brainstormingState.phase = phaseNumber;
+            brainstormingState.phaseName = ycPhases[phaseNumber].name;
+
+            // 更新階段指示器
+            updatePhaseIndicator();
+
+            // 更新 YC 時間線
+            updateYCTimeline();
+
+            // 清空現有貢獻（因為切換到新階段）
+            if (confirm('切換到新階段將清空當前討論內容，確定要繼續嗎？')) {
+                brainstormingState.contributions = [];
+                brainstormingState.startTime = Date.now();
+                document.getElementById('discussionThread').innerHTML = '';
+                updateStatistics();
+            } else {
+                // 如果取消，恢復原階段
+                const previousPhase = phaseNumber === 1 ? 1 : phaseNumber - 1;
+                brainstormingState.phase = previousPhase;
+                brainstormingState.phaseName = ycPhases[previousPhase].name;
+                updatePhaseIndicator();
+                updateYCTimeline();
+            }
+        }
+
+        // 新增：更新階段指示器
+        function updatePhaseIndicator() {
+            const currentPhase = ycPhases[brainstormingState.phase];
+            const phaseIndicator = document.getElementById('currentPhaseDisplay');
+            if (phaseIndicator) {
+                phaseIndicator.innerHTML = `
+                    <h2>YC Phase ${brainstormingState.phase}: ${currentPhase.title}</h2>
+                    <div class="yc-framework">YC 標準新創流程 • ${currentPhase.subtitle}</div>
+                `;
+            }
+        }
+
+        // 新增：更新 YC 時間線
+        function updateYCTimeline() {
+            const timeline = document.getElementById('ycTimeline');
+            if (!timeline) return;
+
+            let timelineHTML = '<h3>YC 五階段開發流程</h3>';
+            for (let i = 1; i <= 5; i++) {
+                const phase = ycPhases[i];
+                const isActive = i === brainstormingState.phase;
+                const isCompleted = i < brainstormingState.phase;
+
+                timelineHTML += `
+                    <div class="yc-phase ${isActive ? 'active' : ''}" onclick="selectPhase(${i})" style="cursor: pointer;">
+                        <div class="phase-number" style="${isCompleted ? 'background: #28a745;' : ''}">${isCompleted ? '✓' : i}</div>
+                        <div class="phase-info">
+                            <h4>Phase ${i}: ${phase.title}</h4>
+                            <p>${phase.subtitle}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            timeline.innerHTML = timelineHTML;
+
+            // 更新 Skills 推薦
+            updateSkillsRecommendation();
+        }
+
+        // 新增：更新 Skills 推薦
+        function updateSkillsRecommendation() {
+            const skillsPanel = document.getElementById('skillsRecommendation');
+            const skillsContainer = document.getElementById('recommendedSkills');
+
+            if (!skillsPanel || !skillsContainer) return;
+
+            const phaseSkills = getRecommendedSkills(brainstormingState.phase);
+
+            // 更新面板標題
+            const currentPhase = ycPhases[brainstormingState.phase];
+            skillsPanel.querySelector('h4').innerHTML = `🚀 Phase ${brainstormingState.phase} 推薦 Skills`;
+
+            // 生成 Skills HTML
+            let skillsHTML = '';
+            phaseSkills.forEach(skill => {
+                const hotSkill = skill.isHot ? 'hot-skill' : '';
+                const hotIcon = skill.isHot ? '🔥 ' : '';
+                const examples = skill.examples.map(ex => `• "${ex}"`).join('<br>');
+
+                skillsHTML += `
+                    <div class="skill-item ${hotSkill}">
+                        <span class="skill-name">${hotIcon}${skill.name}</span>
+                        <span class="skill-usage">${skill.usage}</span>
+                        <div class="skill-examples">
+                            <strong>使用範例：</strong><br>
+                            ${examples}
+                        </div>
+                    </div>
+                `;
+            });
+
+            skillsHTML += `
+                <div style="margin-top: 10px; font-size: 0.85em; color: #666;">
+                    💡 <strong>提示：</strong>在 Claude Code 中直接輸入這些指令即可使用對應的 skills
+                </div>
+            `;
+
+            skillsContainer.innerHTML = skillsHTML;
+        }
+
+        // 新增：獲取推薦 Skills
+        function getRecommendedSkills(phase) {
+            const skillsMapping = {
+                1: [
+                    {
+                        name: '/brainstorming',
+                        usage: '專案開始、多角色討論、想法碰撞',
+                        examples: [
+                            '用 /brainstorming 討論這個新產品想法',
+                            '用 /brainstorming 分析目標用戶的痛點',
+                            '用 /brainstorming 評估競爭優勢'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/plan-ceo-review',
+                        usage: '需要商業和市場分析時',
+                        examples: [
+                            '用 /plan-ceo-review 分析市場規模和商業模式',
+                            '用 /plan-ceo-review 評估定價策略和收入來源',
+                            '用 /plan-ceo-review 檢視競爭定位'
+                        ],
+                        isHot: false
+                    },
+                    {
+                        name: '/plan-eng-review',
+                        usage: '需要技術可行性評估時',
+                        examples: [
+                            '用 /plan-eng-review 評估技術實現難度',
+                            '用 /plan-eng-review 分析開發時間和成本',
+                            '用 /plan-eng-review 識別技術風險'
+                        ],
+                        isHot: false
+                    },
+                    {
+                        name: '/plan-design-review',
+                        usage: '考慮用戶體驗時',
+                        examples: [
+                            '用 /plan-design-review 分析用戶使用場景',
+                            '用 /plan-design-review 評估產品易用性',
+                            '用 /plan-design-review 識別 UX 風險'
+                        ],
+                        isHot: false
+                    },
+                    {
+                        name: '/plan-devex-review',
+                        usage: '關注用戶需求和滿意度時',
+                        examples: [
+                            '用 /plan-devex-review 分析目標用戶需求',
+                            '用 /plan-devex-review 評估用戶獲取策略',
+                            '用 /plan-devex-review 識別用戶風險'
+                        ],
+                        isHot: false
+                    }
+                ],
+                2: [
+                    {
+                        name: '/writing-plans',
+                        usage: '需要詳細規劃和任務拆解時',
+                        examples: [
+                            '用 /writing-plans 制定 Phase 2 開發計劃',
+                            '用 /writing-plans 拆解用戶認證功能',
+                            '用 /writing-plans 規劃 API 設計'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/design-consultation',
+                        usage: '需要專業設計建議時',
+                        examples: [
+                            '用 /design-consultation 討論產品介面設計',
+                            '用 /design-consultation 評估用戶流程',
+                            '用 /design-consultation 優化互動設計'
+                        ],
+                        isHot: false
+                    },
+                    {
+                        name: '/api-and-interface-design',
+                        usage: '設計 API 和系統接口時',
+                        examples: [
+                            '用 /api-and-interface-design 設計 RESTful API',
+                            '用 /api-and-interface-design 定義資料結構',
+                            '用 /api-and-interface-design 規劃第三方整合'
+                        ],
+                        isHot: false
+                    }
+                ],
+                3: [
+                    {
+                        name: '/test-driven-development',
+                        usage: '開發新功能時（強烈推薦）',
+                        examples: [
+                            '用 /test-driven-development 開發用戶登入功能',
+                            '用 /test-driven-development 實現購物車功能',
+                            '用 /test-driven-development 建立 API 端點'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/systematic-debugging',
+                        usage: '遇到 bug 或問題時',
+                        examples: [
+                            '用 /systematic-debugging 修復用戶註冊的 bug',
+                            '用 /systematic-debugging 解決 API 響應慢的問題',
+                            '用 /systematic-debugging 排查資料庫連接錯誤'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: 'code-reviewer agent',
+                        usage: '完成功能後立即進行代碼審查',
+                        examples: [
+                            '使用 code-reviewer agent 審查剛完成的用戶認證功能',
+                            '用 code-reviewer agent 檢查 API 安全性和性能',
+                            '用 code-reviewer agent 評估代碼品質和可維護性'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/planning-and-task-breakdown',
+                        usage: '需要拆解複雜任務時',
+                        examples: [
+                            '用 /planning-and-task-breakdown 拆解支付系統',
+                            '用 /planning-and-task-breakdown 規劃數據遷移'
+                        ],
+                        isHot: false
+                    }
+                ],
+                4: [
+                    {
+                        name: '/requesting-code-review',
+                        usage: '完成功能開發，需要審查時',
+                        examples: [
+                            '用 /requesting-code-review 審查用戶認證模組',
+                            '用 /requesting-code-review 檢視 API 安全性',
+                            '用 /requesting-code-review 評估代碼品質'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/receiving-code-review',
+                        usage: '收到代碼審查回饋時',
+                        examples: [
+                            '用 /receiving-code-review 處理審查意見',
+                            '用 /receiving-code-review 優化代碼品質'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/andrej-karpathy-perspective',
+                        usage: '需要深度工程思維時',
+                        examples: [
+                            '用 /andrej-karpathy-perspective 分析系統架構',
+                            '用 /andrej-karpathy-perspective 評估技術債務'
+                        ],
+                        isHot: false
+                    }
+                ],
+                5: [
+                    {
+                        name: '/ship',
+                        usage: '準備發布產品時',
+                        examples: [
+                            '用 /ship 發布產品 v1.0',
+                            '用 /ship 部署到生產環境',
+                            '用 /ship 進行功能發布'
+                        ],
+                        isHot: true
+                    },
+                    {
+                        name: '/finishing-a-development-branch',
+                        usage: '完成開發分支，準備合併時',
+                        examples: [
+                            '用 /finishing-a-development-branch 完成 feature 分支',
+                            '用 /finishing-a-development-branch 準備 PR'
+                        ],
+                        isHot: false
+                    }
+                ]
+            };
+
+            return skillsMapping[phase] || [];
+        }
+
+        // 添加貢獻
+        function addContribution() {
+            const input = document.getElementById('roleInput');
+            const content = input.value.trim();
+
+            if (!content) {
+                alert('請輸入你的觀點和建議');
+                return;
+            }
+
+            const contribution = {
+                role: brainstormingState.currentRole,
+                roleDef: roleDefinitions[brainstormingState.currentRole],
+                content: content,
+                timestamp: new Date().toISOString()
+            };
+
+            brainstormingState.contributions.push(contribution);
+
+            // 添加到討論區
+            addMessageToThread(contribution);
+
+            // 清空輸入
+            input.value = '';
+
+            // 更新統計
+            updateStatistics();
+
+            // 自動切換到下一個角色（模擬多角色討論）
+            setTimeout(() => {
+                suggestNextRole();
+            }, 1000);
+        }
+
+        // 添加訊息到討論區
+        function addMessageToThread(contribution) {
+            const thread = document.getElementById('discussionThread');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${contribution.role}`;
+
+            const roleDef = roleDefinitions[contribution.role];
+            messageDiv.innerHTML = `
+                <div class="role">${roleDef.icon} ${roleDef.name} 視角</div>
+                <div class="content">${contribution.content}</div>
+                <div class="timestamp">${formatTimestamp(contribution.timestamp)}</div>
+            `;
+
+            thread.appendChild(messageDiv);
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        // 建議下一個角色
+        function suggestNextRole() {
+            const roles = Object.keys(roleDefinitions);
+            const currentIndex = roles.indexOf(brainstormingState.currentRole);
+            const nextIndex = (currentIndex + 1) % roles.length;
+            const nextRole = roles[nextIndex];
+
+            const roleDef = roleDefinitions[nextRole];
+
+            // 添加提示訊息
+            const thread = document.getElementById('discussionThread');
+            const suggestionDiv = document.createElement('div');
+            suggestionDiv.className = 'message';
+            suggestionDiv.style.borderLeftColor = '#ffc107';
+            suggestionDiv.innerHTML = `
+                <div class="role">🤖 系統建議</div>
+                <div class="content">現在邀請 <strong>${roleDef.icon} ${roleDef.name}</strong> 角色發言，分享關於「${roleDef.focus}」的觀點...</div>
+                <div class="timestamp">剛剛</div>
+            `;
+            thread.appendChild(suggestionDiv);
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        // 產生計畫書
+        async function generatePlan() {
+            if (brainstormingState.contributions.length === 0) {
+                alert('請先進行多角色討論，收集足夠的觀點後再產生計畫書');
+                return;
+            }
+
+            try {
+                // 顯示產出區
+                document.getElementById('outputSection').style.display = 'block';
+
+                // 調用後端 skill 產生計畫書
+                const plan = await callBackendBrainstorming();
+
+                // 顯示計畫書預覽
+                document.getElementById('planPreview').textContent = plan;
+
+                // 滾動到產出區
+                document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('產生計畫書失敗:', error);
+                alert('產生計畫書時發生錯誤：' + error.message);
+            }
+        }
+
+        // 調用後端 brainstorming
+        async function callBackendBrainstorming() {
+            // 模擬調用 /brainstorming skill
+            const discussion = brainstormingState.contributions.map(c => {
+                const roleDef = roleDefinitions[c.role];
+                return `[${roleDef.name}] ${c.content}`;
+            }).join('\n\n');
+
+            // 這裡會實際調用 Claude Code 的 /brainstorming skill
+            // 現在用模擬的方式
+            return generateYCPlanMock(brainstormingState.contributions);
+        }
+
+        // 產生 YC 計畫書（模擬）
+        function generateYCPlanMock(contributions) {
+            const timestamp = new Date().toISOString().split('T')[0];
+            const currentPhase = ycPhases[brainstormingState.phase];
+
+            return `# 專案計畫書 - Phase ${brainstormingState.phase}: ${currentPhase.title}
+**YC 標準新創流程 • ${currentPhase.subtitle}**
+
+## 📊 專案基本資訊
+- **專案名稱**: [基於多角色討論產出]
+- **規劃日期**: ${timestamp}
+- **當前階段**: Phase ${brainstormingState.phase} - ${currentPhase.title}
+- **參與角色**: CEO, 工程, 設計, 用戶體驗
+
+## 🎯 多角色討論內容
+${contributions.map(c => {
+    const roleDef = roleDefinitions[c.role];
+    return `
+### ${roleDef.name} 視角
+${c.content}
+`;
+}).join('\n')}
+
+## 🎯 Phase ${brainstormingState.phase} 準備度評估
+
+### 🟢 準備就緒（可以進入下一階段）
+**核心指標：**
+- ✅ 核心想法和目標明確清晰
+- ✅ 多角色視角綜合分析完成
+- ✅ 有明確的下一步行動計劃
+- ✅ 團隊對當前階段達成共識
+
+### 🟡 需要改進（建議先完成以下項目）
+**選擇性改進項目：**
+- [ ] **更深入的研究**：收集更多市場數據和用戶反饋
+- [ ] **技術驗證**：進行概念驗證或原型測試
+- [ ] **競爭分析**：深入研究主要競爭對手
+- [ ] **團隊補充**：尋找額外的團隊成員或顧問
+- [ ] **資源評估**：詳細的預算和時間規劃
+
+### 🔴 尚未準備好（建議先完成）
+**阻礙因素：**
+- ❌ 核心概念仍然模糊或不一致
+- ❌ 缺乏基本的市场或用戶驗證
+- ❌ 技術方案存在重大風險
+- ❌ 團隊共識不足或資源缺乏
+
+### 📋 下一步行動
+**🟢 當準備就緒時：**
+- ${brainstormingState.phase < 5 ? `進入 Phase ${brainstormingState.phase + 1}` : '完成 YC 五階段流程'}
+- 使用對應的 Superpowers 和 Gstack skills
+- 產出具體的階段成果
+
+**🟡 如果需要改進：**
+- 完成更多選擇性改進項目
+- 進行更深入的研究和驗證
+- 裥充必要的團隊成員或資源
+
+**🔴 如果尚未準備好：**
+- 重新定義核心概念
+- 進行基本的市场和用戶驗證
+- 解決關鍵的技術或資源問題
+
+---
+**系統提示**: 此為模擬產生的計畫書，實際使用時會調用真實的 brainstorming-backend.js 進行更詳細的分析。準備度評估基於 YC 的「進度 > 完美」理念，重點在於可執行性而非完美性。
+`;
+}).join('\n')}
+
+## 📋 多角色綜合分析
+
+### 💼 CEO 視角總結
+${contributions.filter(c => c.role === 'ceo').map(c => `• ${c.content}`).join('\n')}
+
+### 🔧 工程視角總結
+${contributions.filter(c => c.role === 'engineering').map(c => `• ${c.content}`).join('\n')}
+
+### 🎨 設計視角總結
+${contributions.filter(c => c.role === 'design').map(c => `• ${c.content}`).join('\n')}
+
+### 👤 用戶體驗視角總結
+${contributions.filter(c => c.role === 'devex').map(c => `• ${c.content}`).join('\n')}
+
+## 🎯 YC 構思與確認標準
+
+### ✅ 必須完成的項目
+- [ ] **核心功能描述**: 清晰定義產品核心價值
+- [ ] **目標用戶分析**: 明確用戶群體和痛點
+- [ ] **市場規模評估**: TAM/SAM/SOM 分析
+- [ ] **競爭優勢**: 與現有解決方案的差異化
+
+### 📊 驗收標準
+- **想法清晰度**: [ ] 能用一句話說清楚產品做什麼
+- **用戶需求**: [ ] 有明確的目標用戶群體
+- **市場機會**: [ ] 市場規模足夠大且有成長性
+- **技術可行性**: [ ] 能在合理時間內實現
+- **團隊能力**: [ ] 團隊有能力執行這個想法
+
+## 🚀 下一步行動
+
+### Phase 1 完成條件
+- 完成度: 0/4 項目
+- 質量評分: 0/100 分
+- 預計時間: 2-4 小時
+
+### Phase 2: 規劃與設計
+- [ ] 詳細產品規格
+- [ ] 技術架構設計
+- [ ] 開發時間表
+- [ ] 資源需求規劃
+
+---
+
+**YC 標準流程**: Idea → Product → Team → Market → Growth
+**下一階段**: Phase 2 - 規劃與設計 (當滿足 Phase 1 驗收標準時自動進入)`;
+        }
+
+        // 更新統計
+        function updateStatistics() {
+            document.getElementById('contributionCount').textContent =
+                brainstormingState.contributions.length;
+
+            const elapsed = Math.floor((Date.now() - brainstormingState.startTime) / 60000);
+            document.getElementById('discussionTime').textContent = `${elapsed} 分鐘`;
+        }
+
+        // 其他功能
+        function switchRole() {
+            alert('🔄 角色切換功能\n\n這將循環切換所有角色，確保每個視角都被充分討論。');
+        }
+
+        function pauseDiscussion() {
+            brainstormingState.isPaused = !brainstormingState.isPaused;
+            alert(brainstormingState.isPaused ? '⏸️ 討論已暫停' : '▶️ 討論已恢復');
+        }
+
+        function askRoleQuestion() {
+            const roleDef = roleDefinitions[brainstormingState.currentRole];
+            const randomQuestion = roleDef.questions[Math.floor(Math.random() * roleDef.questions.length)];
+
+            alert(`❓ 提問 ${roleDef.name}:\n\n${randomQuestion}\n\n請從 ${roleDef.name} 角度回答這個問題。`);
+        }
+
+        function summarizeDiscussion() {
+            if (brainstormingState.contributions.length === 0) {
+                alert('還沒有足夠的討論內容可以總結');
+                return;
+            }
+
+            const summary = brainstormingState.contributions.map(c => {
+                const roleDef = roleDefinitions[c.role];
+                return `${roleDef.icon} ${roleDef.name}: ${c.content.substring(0, 100)}...`;
+            }).join('\n\n');
+
+            alert(`📋 討論總結 (${brainstormingState.contributions.length} 個觀點):\n\n${summary}`);
+        }
+
+        function identifyRisks() {
+            alert('⚠️ 風險識別功能\n\n這將分析多角色討論中提到的潛在風險和挑戰，提供風險緩解建議。\n\n在真實系統中，這裡會調用 /systematic-debugging 或相關 skills。');
+        }
+
+        // 重新開始當前階段
+        function restartCurrentPhase() {
+            // 創建對話框詢問原因
+            const reasons = [
+                '市場變化：發現新的市場機會或市場環境發生重大變化',
+                '技術困難：遇到無法克服的技術挑戰或需要調整技術方案',
+                '新想法：有更好的產品想法或方向調整',
+                '用戶反饋：收到重要的用戶反饋需要重新評估方向',
+                '競爭變化：競爭對手的動作影響了我們的優勢',
+                '資源限制：人力、資金或時間資源發生變化',
+                '團隊變化：團隊成員變化影響執行能力',
+                '其他：其他原因需要重新討論'
+            ];
+
+            const reason = prompt(
+                '🔄 重新開始當前階段\n\n' +
+                '請選擇主要原因（輸入數字 1-8）：\n' +
+                reasons.map((r, i) => `${i + 1}. ${r}`).join('\n') +
+                '\n\n或直接描述您的具體原因：'
+            );
+
+            if (reason) {
+                const selectedReason = reason.match(/^\d+$/) ?
+                    reasons[parseInt(reason) - 1] : reason;
+
+                // 保存當前版本
+                brainstormingVersionControl.createVersion(
+                    brainstormingState.phase,
+                    selectedReason,
+                    [...brainstormingState.contributions]
+                );
+
+                // 清空當前討論，重新開始
+                brainstormingState.contributions = [];
+                brainstormingState.startTime = Date.now();
+                brainstormingState.isRestarting = true;
+
+                // 清空顯示
+                document.getElementById('discussionThread').innerHTML = '';
+
+                // 顯示重新開始通知
+                const restartDiv = document.createElement('div');
+                restartDiv.className = 'message';
+                restartDiv.style.borderLeft = '4px solid #f5576c';
+                restartDiv.style.background = '#ffe6e6';
+                restartDiv.innerHTML = `
+                    <div class="role">🔄 階段重新開始</div>
+                    <div class="content">
+                        <strong>Phase ${brainstormingState.phase} 已重新開始</strong><br>
+                        原因：${selectedReason}<br>
+                        時間：${formatTimestamp(Date.now())}<br>
+                        前一版本已保存：${brainstormingVersionControl.currentVersion}
+                    </div>
+                    <div class="timestamp">${formatTimestamp(Date.now())}</div>
+                `;
+                document.getElementById('discussionThread').appendChild(restartDiv);
+
+                updateStatistics();
+            }
+        }
+
+        // 顯示版本歷史
+        function showVersionHistory() {
+            const versions = brainstormingVersionControl.getVersionHistory();
+
+            if (versions.length === 0) {
+                alert('📜 目前還沒有版本歷史。\n\n當您重新開始某個階段時，系統會自動保存版本記錄。');
+                return;
+            }
+
+            let historyText = '📜 Brainstorming 版本歷史\n\n';
+
+            versions.forEach((version, index) => {
+                const date = new Date(version.timestamp);
+                const dateStr = date.toLocaleString('zh-TW');
+
+                historyText += `版本 ${index + 1}: ${version.id}\n`;
+                historyText += `  階段: Phase ${version.phase}\n`;
+                historyText += `  時間: ${dateStr}\n`;
+                historyText += `  原因: ${version.reason}\n`;
+                historyText += `  影響: ${version.impact}\n`;
+                historyText += `  狀態: ${version.status}\n\n`;
+            });
+
+            historyText += '💡 提示：每次重新開始階段時，系統會自動保存當前版本，方便您追蹤項目演進過程。';
+
+            alert(historyText);
+        }
+
+        function exportPlan() {
+            const planContent = document.getElementById('planPreview').textContent;
+
+            const blob = new Blob([planContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `YC_Project_Plan_${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveToBackend() {
+            alert('💾 儲存到後端\n\n在真實系統中，這將：\n1. 更新 PROJECT_PLAN.md\n2. 更新 progress.json\n3. 提交到 Git 版本控制\n\n確保後端是真相來源！');
+        }
+
+        function continueToNextPhase() {
+            alert('➡️ 進入 Phase 2\n\n恭喜完成 Phase 1: 構思與確認！\n\n當滿足驗收標準後，系統會自動進入 Phase 2: 規劃與設計。\n\n下一階段將使用：\n• /design-consultation\n• /writing-plans\n• Gstack 規劃視角');
+        }
+
+        // 工具函數
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return `${diff} 秒前`;
+            if (diff < 3600) return `${Math.floor(diff / 60)} 分鐘前`;
+            return date.toLocaleTimeString();
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 設置初始角色
+            selectRole('ceo');
+
+            // 初始化階段顯示
+            updatePhaseIndicator();
+            updateYCTimeline();
+
+            // 初始化 Skills 推薦面板（動態創建）
+            initializeSkillsRecommendation();
+
+            // 開始計時器更新討論時間
+            setInterval(() => {
+                if (!brainstormingState.isPaused) {
+                    updateStatistics();
+                }
+            }, 60000);
+        });
+
+        // 初始化 Skills 推薦面板
+        function initializeSkillsRecommendation() {
+            // 找到適當的位置插入面板
+            const ycTimeline = document.getElementById('ycTimeline');
+            if (ycTimeline && !document.getElementById('skillsRecommendation')) {
+                const skillsPanel = document.createElement('div');
+                skillsPanel.className = 'skills-recommendation';
+                skillsPanel.id = 'skillsRecommendation';
+                skillsPanel.innerHTML = `
+                    <h4>🚀 Phase 1 推薦 Skills</h4>
+                    <div id="recommendedSkills">
+                        <!-- Skills 將由 JavaScript 動態生成 -->
+                    </div>
+                `;
+
+                // 在 YC 時間線之前插入
+                ycTimeline.parentNode.insertBefore(skillsPanel, ycTimeline);
+
+                // 立即更新一次 Skills 推薦
+                updateSkillsRecommendation();
+            }
+        }
+    </script>
+</body>
+</html>

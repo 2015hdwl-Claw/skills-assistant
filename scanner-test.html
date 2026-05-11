@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scanner Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .result { background: #2d2d2d; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #f87171; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Project Scanner Test</h1>
+    <button onclick="testScanner()">測試專案掃描</button>
+    <div id="results"></div>
+
+    <script src="project-scanner.js"></script>
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        async function testScanner() {
+            results.innerHTML = '';
+            addResult('🔄 開始測試專案掃描...');
+
+            try {
+                addResult('✅ RealProjectScanner 類別已載入');
+
+                const scanner = new RealProjectScanner();
+                addResult('✅ Scanner 實例創建成功');
+
+                addResult('🔍 開始掃描專案...');
+                const projects = await scanner.scanAllProjects();
+
+                addResult(`🎉 掃描完成，找到 ${projects.length} 個專案`, 'success');
+
+                if (projects.length > 0) {
+                    projects.forEach((project, index) => {
+                        addResult(`專案 ${index + 1}: ${project.displayName} (${project.name}) - 當前階段: ${project.currentPhase}, 進度: ${project.progress}%`, 'success');
+                    });
+                } else {
+                    addResult('⚠️ 未找到任何專案，使用示例資料', 'error');
+                }
+
+            } catch (error) {
+                addResult(`❌ 測試失敗: ${error.message}`, 'error');
+                console.error('詳細錯誤:', error);
+            }
+        }
+
+        // 錯誤捕獲
+        window.addEventListener('error', (e) => {
+            addResult(`🚨 錯誤: ${e.message}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            addResult(`🚨 Promise 錯誤: ${e.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

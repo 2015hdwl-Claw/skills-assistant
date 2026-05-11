@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 格式轉換驗證測試</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .test-title {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .test-result {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .phase-indicator {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .phase-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .phase-dot.completed { background: #48bb78; }
+        .phase-dot.in_progress { background: #ed8936; }
+        .phase-dot.not_started { background: #cbd5e0; }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Dashboard 格式轉換驗證測試</h1>
+        <p>驗證 project-scanner.js 的格式轉換修復效果</p>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">📋 測試控制台</div>
+        <div class="button-group">
+            <button onclick="runAllTests()">🚀 執行完整測試</button>
+            <button onclick="testStandardFormat()">📊 測試標準格式</button>
+            <button onclick="testSocialFormat()">🔄 測試 Social 格式轉換</button>
+            <button onclick="testScannerDiscovery()">🔍 測試專案發現功能</button>
+        </div>
+        <div id="testStatus" class="status pending">等待測試開始...</div>
+    </div>
+
+    <div id="testResults"></div>
+
+    <div class="test-section">
+        <div class="test-title">📊 專案掃描結果</div>
+        <div id="projectResults"></div>
+    </div>
+
+    <script src="project-scanner.js"></script>
+    <script>
+        let testResults = [];
+        let scanner = new RealProjectScanner();
+
+        function updateTestStatus(message, type = 'pending') {
+            const statusEl = document.getElementById('testStatus');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function addTestResult(title, status, details) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'test-result';
+            resultDiv.innerHTML = `
+                <div><strong>${title}</strong> <span class="status ${status}">${status.toUpperCase()}</span></div>
+                <div class="code-block">${JSON.stringify(details, null, 2)}</div>
+            `;
+            document.getElementById('testResults').appendChild(resultDiv);
+
+            testResults.push({ title, status, details, timestamp: new Date() });
+        }
+
+        function displayProjectProjects(projects) {
+            const container = document.getElementById('projectResults');
+            container.innerHTML = '';
+
+            if (!projects || projects.length === 0) {
+                container.innerHTML = '<div class="test-result">❌ 未發現任何專案</div>';
+                return;
+            }
+
+            // 總結統計
+            const stats = {
+                totalProjects: projects.length,
+                completedPhases: 0,
+                avgProgress: 0,
+                currentPhases: {}
+            };
+
+            projects.forEach(project => {
+                if (project.phases) {
+                    project.phases.forEach(phase => {
+                        if (phase.status === 'completed') stats.completedPhases++;
+                        if (phase.status === 'in_progress') {
+                            stats.currentPhases[project.name] = phase.name;
+                        }
+                    });
+                }
+                stats.avgProgress += project.progress || 0;
+            });
+            stats.avgProgress = Math.round(stats.avgProgress / projects.length);
+
+            const statsHtml = `
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">總專案數</div>
+                        <div class="stat-value">${stats.totalProjects}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">已完成階段</div>
+                        <div class="stat-value">${stats.completedPhases}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">平均進度</div>
+                        <div class="stat-value">${stats.avgProgress}%</div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += statsHtml;
+
+            // 顯示每個專案
+            projects.forEach(project => {
+                const projectDiv = document.createElement('div');
+                projectDiv.className = 'project-card';
+
+                const phasesHtml = project.phases ? project.phases.map(phase => `
+                    <div class="phase-indicator">
+                        <div class="phase-dot ${phase.status}"></div>
+                        <div>${phase.name}: ${phase.progress}% (${phase.checklist})</div>
+                    </div>
+                `).join('') : '';
+
+                projectDiv.innerHTML = `
+                    <h3>${project.displayName || project.name}</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${project.progress}%">
+                            ${project.progress}%
+                        </div>
+                    </div>
+                    <div><strong>當前階段:</strong> ${project.currentPhase}</div>
+                    <div><strong>最後更新:</strong> ${new Date(project.lastUpdated).toLocaleString('zh-TW')}</div>
+                    <div><strong>階段概況:</strong></div>
+                    ${phasesHtml}
+                `;
+
+                container.appendChild(projectDiv);
+            });
+        }
+
+        async function testStandardFormat() {
+            updateTestStatus('測試標準格式 (admission-master)...', 'pending');
+
+            try {
+                const progressFile = './admission-master_PROGRESS.json';
+                const progressData = await scanner.readProjectProgress(progressFile);
+
+                if (progressData) {
+                    const success = progressData.project_info && progressData.phases;
+                    addTestResult(
+                        '標準格式測試',
+                        success ? 'success' : 'error',
+                        {
+                            format: 'admission-master 標準格式',
+                            hasProjectInfo: !!progressData.project_info,
+                            hasPhases: !!progressData.phases,
+                            currentPhase: progressData.project_info?.current_phase,
+                            phasesCount: Object.keys(progressData.phases || {}).length,
+                            structure: 'project_info + phases'
+                        }
+                    );
+
+                    if (success) {
+                        updateTestStatus('✅ 標準格式測試通過！', 'success');
+                    } else {
+                        updateTestStatus('❌ 標準格式結構異常', 'error');
+                    }
+                } else {
+                    addTestResult('標準格式測試', 'error', { error: '無法載入 admission-master_PROGRESS.json' });
+                    updateTestStatus('❌ 標準格式載入失敗', 'error');
+                }
+            } catch (error) {
+                addTestResult('標準格式測試', 'error', { error: error.message });
+                updateTestStatus('❌ 標準格式測試出錯', 'error');
+            }
+        }
+
+        async function testSocialFormat() {
+            updateTestStatus('測試 Social 格式轉換...', 'pending');
+
+            try {
+                const progressFile = './social_PROGRESS.json';
+                const progressData = await scanner.readProjectProgress(progressFile);
+
+                if (progressData) {
+                    const isConverted = progressData.project_info && progressData.phases;
+                    const hasStandardStructure = isConverted &&
+                        progressData.project_info.current_phase &&
+                        Object.keys(progressData.phases).some(key => key.startsWith('PHASE_'));
+
+                    addTestResult(
+                        'Social 格式轉換測試',
+                        hasStandardStructure ? 'success' : 'error',
+                        {
+                            originalFormat: 'social meta + phases',
+                            convertedFormat: hasStandardStructure ? '標準 project_info + phases' : '轉換失敗',
+                            hasProjectInfo: !!progressData.project_info,
+                            hasPhases: !!progressData.phases,
+                            currentPhase: progressData.project_info?.current_phase,
+                            phaseKeys: Object.keys(progressData.phases || {}),
+                            conversionSuccess: hasStandardStructure
+                        }
+                    );
+
+                    if (hasStandardStructure) {
+                        updateTestStatus('✅ Social 格式轉換成功！', 'success');
+                    } else {
+                        updateTestStatus('❌ Social 格式轉換失敗', 'error');
+                    }
+                } else {
+                    addTestResult('Social 格式轉換測試', 'error', { error: '無法載入 social_PROGRESS.json' });
+                    updateTestStatus('❌ Social 格式載入失敗', 'error');
+                }
+            } catch (error) {
+                addTestResult('Social 格式轉換測試', 'error', { error: error.message });
+                updateTestStatus('❌ Social 格式轉換測試出錯', 'error');
+            }
+        }
+
+        async function testScannerDiscovery() {
+            updateTestStatus('測試專案發現功能...', 'pending');
+
+            try {
+                const discoveredProjects = await scanner.discoverExistingProjects();
+
+                addTestResult(
+                    '專案發現測試',
+                    discoveredProjects.length > 0 ? 'success' : 'error',
+                    {
+                        discoveredProjects: discoveredProjects,
+                        discoveryCount: discoveredProjects.length,
+                        discoverySuccessful: discoveredProjects.length > 0,
+                        availableProjects: ['admission-master', 'social', 'activity-master', 'knowledge-master']
+                    }
+                );
+
+                if (discoveredProjects.length > 0) {
+                    updateTestStatus(`✅ 發現 ${discoveredProjects.length} 個專案！`, 'success');
+                } else {
+                    updateTestStatus('❌ 未發現任何專案', 'error');
+                }
+            } catch (error) {
+                addTestResult('專案發現測試', 'error', { error: error.message });
+                updateTestStatus('❌ 專案發現測試出錯', 'error');
+            }
+        }
+
+        async function testFullScan() {
+            updateTestStatus('執行完整專案掃描...', 'pending');
+
+            try {
+                const allProjects = await scanner.scanAllProjects();
+
+                addTestResult(
+                    '完整掃描測試',
+                    allProjects.length > 0 ? 'success' : 'error',
+                    {
+                        scannedProjects: allProjects.length,
+                        projectNames: allProjects.map(p => p.name),
+                        displayNames: allProjects.map(p => p.displayName),
+                        avgProgress: Math.round(allProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / allProjects.length),
+                        scanSuccessful: allProjects.length > 0
+                    }
+                );
+
+                displayProjectProjects(allProjects);
+
+                if (allProjects.length > 0) {
+                    updateTestStatus(`✅ 掃描完成！發現 ${allProjects.length} 個專案`, 'success');
+                } else {
+                    updateTestStatus('❌ 掃描完成但未發現專案', 'error');
+                }
+            } catch (error) {
+                addTestResult('完整掃描測試', 'error', { error: error.message });
+                updateTestStatus('❌ 完整掃描測試出錯', 'error');
+            }
+        }
+
+        async function runAllTests() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('projectResults').innerHTML = '';
+            testResults = [];
+
+            updateTestStatus('🚀 開始執行完整測試套件...', 'pending');
+
+            await testStandardFormat();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            await testSocialFormat();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            await testScannerDiscovery();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            await testFullScan();
+
+            // 測試摘要
+            const successCount = testResults.filter(r => r.status === 'success').length;
+            const totalCount = testResults.length;
+            const successRate = Math.round((successCount / totalCount) * 100);
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'test-result';
+            summaryDiv.innerHTML = `
+                <h3>🎯 測試摘要</h3>
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">總測試數</div>
+                        <div class="stat-value">${totalCount}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">成功測試</div>
+                        <div class="stat-value">${successCount}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">成功率</div>
+                        <div class="stat-value">${successRate}%</div>
+                    </div>
+                </div>
+                <div><strong>總體評估:</strong> ${successRate >= 75 ? '✅ 測試通過' : '❌ 測試失敗'}</div>
+            `;
+            document.getElementById('testResults').appendChild(summaryDiv);
+
+            updateTestStatus(
+                successRate >= 75 ? `🎉 測試完成！成功率: ${successRate}%` : `⚠️ 測試完成但成功率偏低: ${successRate}%`,
+                successRate >= 75 ? 'success' : 'error'
+            );
+        }
+
+        // 頁面載入時自動執行基礎檢查
+        window.addEventListener('load', async () => {
+            console.log('🚀 Dashboard 格式轉換驗證測試載入完成');
+            console.log('📋 可用測試功能:');
+            console.log('  - runAllTests()       : 執行完整測試套件');
+            console.log('  - testStandardFormat(): 測試標準格式');
+            console.log('  - testSocialFormat()  : 測試 Social 格式轉換');
+            console.log('  - testScannerDiscovery(): 測試專案發現功能');
+
+            // 自動執行快速檢查
+            updateTestStatus('🔍 執行快速檢查...', 'pending');
+
+            const quickCheck = await scanner.discoverExistingProjects();
+            if (quickCheck.length > 0) {
+                updateTestStatus(`✅ 快速檢查完成 - 發現 ${quickCheck.length} 個專案`, 'success');
+            } else {
+                updateTestStatus('⚠️ 快速檢查完成 - 未發現專案檔案', 'pending');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+{
+  "project_info": {
+    "name": "專案名稱",
+    "start_date": "2026-05-02",
+    "current_phase": "PHASE_1",
+    "last_updated": "2026-05-02T21:47:00Z"
+  },
+
+  "phases": {
+    "PHASE_1": {
+      "name": "構思與確認",
+      "status": "in_progress",
+      "start_time": "2026-05-02T14:00:00Z",
+      "end_time": null,
+      "progress_percentage": 40,
+      "checklist": {
+        "core_features": {
+          "completed": false,
+          "completed_at": null
+        },
+        "target_users": {
+          "completed": true,
+          "completed_at": "2026-05-02T15:30:00Z"
+        },
+        "multidimensional_analysis": {
+          "completed": false,
+          "completed_at": null
+        },
+        "feasibility_study": {
+          "completed": false,
+          "completed_at": null
+        }
+      },
+      "skills_used": [
+        "/brainstorming",
+        "/plan-ceo-review"
+      ],
+      "outputs": [
+        "brainstorming-notes.md",
+        "user-analysis.md"
+      ]
+    },
+
+    "PHASE_2": {
+      "name": "規劃與設計",
+      "status": "not_started",
+      "start_time": null,
+      "end_time": null,
+      "progress_percentage": 0,
+      "checklist": {},
+      "skills_used": [],
+      "outputs": []
+    },
+
+    "PHASE_3": {
+      "name": "開發執行",
+      "status": "not_started",
+      "start_time": null,
+      "end_time": null,
+      "progress_percentage": 0,
+      "checklist": {},
+      "skills_used": [],
+      "outputs": []
+    },
+
+    "PHASE_4": {
+      "name": "測試驗證",
+      "status": "not_started",
+      "start_time": null,
+      "end_time": null,
+      "progress_percentage": 0,
+      "checklist": {},
+      "skills_used": [],
+      "outputs": []
+    },
+
+    "PHASE_5": {
+      "name": "發布部署",
+      "status": "not_started",
+      "start_time": null,
+      "end_time": null,
+      "progress_percentage": 0,
+      "checklist": {},
+      "skills_used": [],
+      "outputs": []
+    }
+  },
+
+  "ai_tasks": [
+    {
+      "id": "task_1",
+      "name": "brainstorming",
+      "phase": "PHASE_1",
+      "status": "completed",
+      "start_time": "2026-05-02T14:23:00Z",
+      "end_time": "2026-05-02T14:35:00Z",
+      "skill_used": "/brainstorming",
+      "outputs": [
+        "3個核心洞察",
+        "用戶痛點分析"
+      ],
+      "next_steps": "多維度視角分析"
+    },
+    {
+      "id": "task_2",
+      "name": "多維度視角分析",
+      "phase": "PHASE_1",
+      "status": "in_progress",
+      "start_time": "2026-05-02T14:35:00Z",
+      "end_time": null,
+      "skill_used": "/plan-ceo-review",
+      "outputs": [],
+      "estimated_completion": "2026-05-02T15:10:00Z"
+    }
+  ],
+
+  "user_experience": {
+    "level": "intermediate",
+    "adaptation_mode": "automatic",
+    "satisfaction_score": 8.5,
+    "last_feedback": "2026-05-02"
+  },
+
+  "system_metrics": {
+    "total_time_spent": "2.5 hours",
+    "skills_usage_count": {
+      "/brainstorming": 5,
+      "/plan-ceo-review": 2,
+      "/test-driven-development": 0
+    },
+    "success_rate": 85.0,
+    "average_task_duration": "45 minutes"
+  }
+}

@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills 學習助手 - 專案儀表板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            --card-bg: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.theme-transition {
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: var(--border-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .keyboard-shortcuts {
+            background: var(--border-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px var(--shadow-color);
+        }
+
+        .card.collapsed .card-content {
+            display: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .collapse-btn:hover {
+            background: var(--border-color);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-section {
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-pending {
+            background: #9ca3af;
+            color: white;
+        }
+
+        .status-completed {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .phase-list {
+            list-style: none;
+        }
+
+        .phase-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            border-radius: 6px;
+            border-left: 3px solid #d1d5db;
+        }
+
+        .phase-item.current {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .phase-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 2px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .phase-item.completed .phase-checkbox {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .task-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--info-color);
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: scale(1.02);
+        }
+
+        .task-card.drag-over {
+            border-top: 2px solid var(--success-color);
+        }
+
+        .task-card.completed {
+            animation: taskComplete 0.5s ease;
+        }
+
+        @keyframes taskComplete {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background: var(--success-color); }
+            100% { transform: scale(1); }
+        }
+
+        .task-card.fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .task-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .task-time {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .task-output {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .next-steps {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .next-steps h3 {
+            color: #d97706;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .learning-section {
+            background: #ede9fe;
+            border-left: 3px solid #8b5cf6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .learning-section h3 {
+            color: #7c3aed;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .learning-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .metric {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .current-phase-highlight {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .current-phase-highlight h3 {
+            margin-bottom: 5px;
+        }
+
+        .ai-task-tracker {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transparency-info {
+            background: #dbeafe;
+            border-left: 3px solid #3b82f6;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .transparency-info h3 {
+            color: #1e40af;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .transparency-info p {
+            font-size: 13px;
+            color: #1e3a8a;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <h1>🎯 Skills 學習助手 - 專案儀表板</h1>
+                <p>透明化進度追蹤 | 標準化流程 | AI 任務可視化</p>
+            </div>
+            <div class="header-controls">
+                <button class="keyboard-shortcuts" onclick="showKeyboardShortcuts()" title="Keyboard Shortcuts">⌨️ Shortcuts</button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙 Theme</button>
+            </div>
+        </div>
+
+        <!-- Transparency Info -->
+        <div class="transparency-info">
+            <h3>💡 你不再是「被AI帶著走」</h3>
+            <p>這個儀表板讓你看到專案真實進度、AI 工作狀態、下一步該做什麼。你保持控制權，AI 執行具體任務。</p>
+            <div id="userEnvironmentInfo" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(59, 130, 246, 0.3);">
+                <strong>🛠️ 開發環境：</strong> <span id="devToolDisplay">載入中...</span><br>
+                <strong>📁 專案位置：</strong> <span id="projectPathDisplay">載入中...</span><br>
+                <strong>🎯 專案想法：</strong> <span id="projectIdeaDisplay">載入中...</span>
+            </div>
+        </div>
+
+        <!-- Current Phase -->
+        <div class="current-phase-highlight">
+            <h3>🎯 當前階段: Phase 1 - 構思與確認</h3>
+            <p>進度: 40% | 狀態: 進行中</p>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Progress Card -->
+            <div class="card">
+                <h2>📊 標準流程追蹤</h2>
+
+                <div class="progress-section">
+                    <label>Phase 1: 構思與確認</label>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%">40%</div>
+                    </div>
+                </div>
+
+                <ul class="phase-list">
+                    <li class="phase-item current">
+                        <div class="phase-checkbox">🔄</div>
+                        <div>Phase 1: 構思與確認 (進行中)</div>
+                    </li>
+                    <li class="phase-item">
+                        <div class="phase-checkbox">⏳</div>
+                        <div>Phase 2: 規劃與設計</div>
+                    </li>
+                    <li class="phase-item">
+                        <div class="phase-checkbox">⏳</div>
+                        <div>Phase 3: 開發執行</div>
+                    </li>
+                    <li class="phase-item">
+                        <div class="phase-checkbox">⏳</div>
+                        <div>Phase 4: 測試驗證</div>
+                    </li>
+                    <li class="phase-item">
+                        <div class="phase-checkbox">⏳</div>
+                        <div>Phase 5: 發布部署</div>
+                    </li>
+                </ul>
+
+                <div class="next-steps">
+                    <h3>📍 下一步行動</h3>
+                    <p>完成多維度視角分析 → 產生標準化計畫文件</p>
+                </div>
+            </div>
+
+            <!-- AI Task Tracker -->
+            <div class="card">
+                <h2>🤖 執行指引與任務追蹤</h2>
+
+                <div class="task-card" draggable="true" data-task-id="1">
+                    <div class="task-header">
+                        <strong>步驟 #1: 專案構思</strong>
+                        <span class="task-status status-completed">✅ 已完成初步想法</span>
+                    </div>
+                    <div class="task-output">
+                        <strong>📋 下一步執行指引：</strong><br>
+                        <div id="brainstormingGuidance" style="background: #e0f2fe; padding: 10px; border-radius: 4px; margin-top: 8px;">
+                            <strong>執行方式：</strong>在你的 <span id="tool1Display">VS Code + Claude Code</span> 中執行：<br>
+                            <code style="background: white; padding: 2px 6px; border-radius: 3px;">/brainstorming "你的專案想法"</code><br>
+                            <strong>專案位置：</strong><span id="path1Display">C:\Projects\YourProject</span><br>
+                            <strong>預計時間：</strong>20-30 分鐘<br>
+                            <strong>完成後：</strong>回到這裡點選「完成構思」
+                        </div>
+                    </div>
+                    <div class="control-buttons" style="margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="markTaskComplete('brainstorming')">✅ 完成構思，下一步</button>
+                        <button class="btn btn-secondary" onclick="viewBrainstormingResults()">📋 查看結果</button>
+                    </div>
+                </div>
+
+                <div class="task-card" draggable="true" data-task-id="2">
+                    <div class="task-header">
+                        <strong>步驟 #2: 規劃與設計</strong>
+                        <span class="task-status status-pending">⏳ 待執行</span>
+                    </div>
+                    <div class="task-output">
+                        <strong>前置條件：</strong>完成步驟 #1<br>
+                        <strong>執行方式：</strong>完成構思後系統會提供具體指引
+                    </div>
+                </div>
+
+                <div class="task-card" draggable="true" data-task-id="3">
+                    <div class="task-header">
+                        <strong>步驟 #3: 開發實作</strong>
+                        <span class="task-status status-pending">⏳ 待規劃</span>
+                    </div>
+                    <div class="task-output">
+                        <strong>執行方式：</strong>完成規劃後會提供 TDD 和開發指引
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="btn btn-primary" onclick="refreshTasks()">🔄 更新狀態</button>
+                    <button class="btn btn-secondary" onclick="openProjectFolder()">📁 打開專案資料夾</button>
+                </div>
+            </div>
+
+            <!-- Learning Progress -->
+            <div class="card">
+                <h2>🎓 學習進度追蹤</h2>
+
+                <div class="learning-section">
+                    <h3>YC 方法論掌握</h3>
+                    <div class="learning-metrics">
+                        <div class="metric">
+                            <div class="metric-value">1/5</div>
+                            <div class="metric-label">完成階段</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">20%</div>
+                            <div class="metric-label">整體進度</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">3</div>
+                            <div class="metric-label">使用次數</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">85%</div>
+                            <div class="metric-label">滿意度</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="learning-section" style="margin-top: 15px;">
+                    <h3>📈 學習成長</h3>
+                    <p style="font-size: 13px; color: #6b7280;">
+                        ✅ 學會: 標準化流程的重要性<br>
+                        ✅ 學會: AI 透明化追蹤<br>
+                        🔄 學習中: 多維度視角分析
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 1 Template Preview -->
+        <div class="card">
+            <h2>📋 Phase 1 標準化模板預覽</h2>
+
+            <div style="background: #f9fafb; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 13px; max-height: 400px; overflow-y: auto;">
+                <strong># Phase 1: 構思與確認 - 標準化模板</strong><br><br>
+                <strong>## 🎯 階段目標</strong><br>
+                將模糊的想法轉化為清晰的專案定義<br><br>
+                <strong>## ✅ 必須完成的項目（檢查清單）</strong><br>
+                - [ ] 專案目標: 一句話清楚說明<br>
+                - [ ] 目標用戶: 明確定義給誰用<br>
+                - [ ] 核心痛點: 描述解決什麼問題<br>
+                - [ ] CEO 視角分析: 市場機會<br>
+                - [ ] 工程視角分析: 技術可行性<br>
+                - [ ] 設計視角分析: 用戶體驗<br>
+                - [ ] DX 視角分析: 開發體驗<br>
+                - [ ] 商業可行性評估<br>
+                - [ ] 技術可行性評估<br><br>
+                <strong>## 📊 進度指標</strong><br>
+                完成度: 完成項目 / 總項目 × 100<br>
+                質量評分: 基本60分 / 良好80分 / 優秀90+分<br><br>
+                <strong>## 🎯 標準輸出格式</strong><br>
+                專案基本資訊 + 多維度分析結果<br>
+                清晰的定義 + 可行性評估<br><br>
+                <strong>## 🎓 學習要點</strong><br>
+                YC 構思方法 + 多維度分析 + 可行性判斷<br>
+                <br>
+                <strong style="color: #10b981;">✅ 查看完整模板請點擊下方按鈕</strong>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h2>🎮 快速操作</h2>
+
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="exportProgress()">📤 匯出進度報告</button>
+                <button class="btn btn-secondary" onclick="viewTemplate()">📋 查看完整模板</button>
+                <button class="btn btn-secondary" onclick="adjustPhase()">🎯 調整階段</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 更新任務狀態
+        function refreshTasks() {
+            alert('🔄 正在更新 AI 任務狀態...\n\n這個功能會連接到實際的 AI 系統，獲取最新的任務進度。');
+            // 實際實作會連接到 Claude Code API
+        }
+
+        // 查看詳情
+        function viewDetails() {
+            alert('📋 任務詳情:\n\n這個功能會顯示每個 AI 任務的詳細執行過程和產出結果。');
+        }
+
+        // 匯出進度報告
+        function exportProgress() {
+            const report = `
+Skills 學習助手 - 專案進度報告
+===================================
+
+當前階段: Phase 1 - 構思與確認
+進度: 40%
+狀態: 進行中
+
+已完成任務: 1/3
+進行中任務: 1/3
+等待中任務: 1/3
+
+學習進度: 20% (1/5 階段)
+            `;
+
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'progress-report.txt';
+            a.click();
+        }
+
+        // 查看完整模板
+        function viewTemplate() {
+            const fullTemplate = `
+═══════════════════════════════════════════════════════════
+🎯 Phase 1: 構思與確認 - 完整標準化模板
+═══════════════════════════════════════════════════════════
+
+【階段目標】
+將模糊的想法轉化為清晰的專案定義
+
+【✅ 必須完成的 9 項檢查清單】
+
+📋 核心定義 (4項)
+  ☐ 專案目標：一句話清楚說明這個專案要做什麼
+  ☐ 目標用戶：明確定義這個專案給誰用
+  ☐ 核心痛點：描述解決什麼具體問題
+  ☐ 差異化優勢：與現有方案的區別
+
+🎭 多維度視角分析 (4項)
+  ☐ CEO 視角 (/plan-ceo-review)：市場機會、競爭優勢
+  ☐ 工程視角 (/plan-eng-review)：技術可行性、開發複雜度
+  ☐ 設計視角 (/plan-design-review)：用戶體驗、操作流程
+  ☐ DX 視角 (/plan-devex-review)：開發體驗、可維護性
+
+📊 可行性確認 (1項)
+  ☐ 綜合評估：是否值得投入時間開發
+
+【📊 進度計算方式】
+完成度 = 已完成項目 / 9 × 100
+
+【🎯 標準輸出格式】
+1. 專案基本資訊卡片
+2. 多維度分析報告
+3. 可行性評估總結
+4. 進入 Phase 2 準備確認
+
+【💡 成功關鍵】
+• 花時間在構思 = 節省後面 10倍修正時間
+• 多維度分析 = 避免「技術導向」盲點
+• 標準化輸出 = 專業的專案定義
+
+【🚫 常見錯誤】
+❌ 跳過分析直接開發
+❌ 模糊的目標定義
+❌ 只考慮技術不考慮用戶
+
+【🎓 這個階段你會學到】
+✅ YC 構思方法：系統化思考專案
+✅ 多維度分析：從不同角度評估想法
+✅ 可行性判斷：區分好想法和壞想法
+✅ 標準化輸出：專業的專案定義
+
+【條件：進入 Phase 2】
+✅ 完成度: 100% (9/9 項目)
+✅ 質量評分: > 70 分
+✅ 你確認：準備進入下一階段
+
+═══════════════════════════════════════════════════════════
+            `;
+
+            alert(fullTemplate);
+        }
+
+        // 調整階段
+        function adjustPhase() {
+            const confirmMove = confirm('確定要進入下一個階段嗎？\n\n只有當前階段的所有必要項目完成後才建議進入下一階段。');
+            if (confirmMove) {
+                alert('✅ 階段調整功能\n\n這個功能會驗證當前階段完成度，然後進入下一個標準化階段。');
+            }
+        }
+
+        // 實時更新（模擬）
+        setInterval(() => {
+            if (window.skillsTracker) {
+                skillsTracker.saveProgress();
+                console.log('🔄 進度已自動保存');
+            }
+        }, 30000); // 每30秒更新一次
+
+        // === Enhanced Interactive Features ===
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            body.classList.add('theme-transition');
+            body.setAttribute('data-theme', newTheme);
+
+            // Save preference
+            localStorage.setItem('theme', newTheme);
+
+            setTimeout(() => {
+                body.classList.remove('theme-transition');
+            }, 500);
+
+            // Update button text
+            const themeBtn = document.querySelector('.theme-toggle');
+            themeBtn.textContent = newTheme === 'dark' ? '☀️ Theme' : '🌙 Theme';
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            const themeBtn = document.querySelector('.theme-toggle');
+            if (themeBtn) {
+                themeBtn.textContent = savedTheme === 'dark' ? '☀️ Theme' : '🌙 Theme';
+            }
+        }
+
+        // Drag and Drop Functionality
+        function initializeDragAndDrop() {
+            const taskCards = document.querySelectorAll('.task-card');
+            const aiTaskTracker = document.querySelector('.ai-task-tracker');
+
+            taskCards.forEach(card => {
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragenter', handleDragEnter);
+                card.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        let draggedCard = null;
+
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.task-card').forEach(card => {
+                card.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (draggedCard !== this) {
+                // Get all task cards
+                const allCards = [...document.querySelectorAll('.task-card')];
+                const draggedIndex = allCards.indexOf(draggedCard);
+                const droppedIndex = allCards.indexOf(this);
+
+                // Reorder
+                if (draggedIndex < droppedIndex) {
+                    this.parentNode.insertBefore(draggedCard, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedCard, this);
+                }
+
+                // Animation for reordering
+                draggedCard.classList.add('fade-in');
+                setTimeout(() => draggedCard.classList.remove('fade-in'), 300);
+            }
+
+            return false;
+        }
+
+        // Keyboard Shortcuts
+        function showKeyboardShortcuts() {
+            const shortcuts = `
+⌨️ Keyboard Shortcuts
+=====================
+
+Theme:          T (or Ctrl/Cmd + Shift + T)
+Refresh:        R (or Ctrl/Cmd + R)
+Export:         E (or Ctrl/Cmd + S)
+Details:        D (or Ctrl/Cmd + I)
+Help:           ? (or F1)
+
+Navigation:
+  Next Card:    Ctrl/Cmd + ↓
+  Prev Card:    Ctrl/Cmd + ↑
+  Collapse:     Ctrl/Cmd + →
+
+Task Actions:
+  Complete:     Ctrl/Cmd + Enter
+  Delete:       Ctrl/Cmd + Backspace
+
+Press ESC to close this dialog
+            `;
+
+            alert(shortcuts);
+        }
+
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if typing in input
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                // Theme toggle
+                if (e.key === 't' || e.key === 'T' || (e.ctrlKey && e.shiftKey && e.key === 'T')) {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+
+                // Refresh tasks
+                if (e.key === 'r' || e.key === 'R' || (e.ctrlKey && e.key === 'r')) {
+                    e.preventDefault();
+                    refreshTasks();
+                }
+
+                // Export progress
+                if (e.key === 'e' || e.key === 'E' || (e.ctrlKey && e.key === 's')) {
+                    e.preventDefault();
+                    exportProgress();
+                }
+
+                // View details
+                if (e.key === 'd' || e.key === 'D' || (e.ctrlKey && e.key === 'i')) {
+                    e.preventDefault();
+                    viewDetails();
+                }
+
+                // Help
+                if (e.key === '?' || e.key === 'F1') {
+                    e.preventDefault();
+                    showKeyboardShortcuts();
+                }
+
+                // ESC to close potential modals
+                if (e.key === 'Escape') {
+                    // Close any open dialogs if we implement them
+                }
+            });
+        }
+
+        // Real-time Updates (simulated without page refresh)
+        function initializeRealTimeUpdates() {
+            // Simulate AI task progress updates
+            setInterval(() => {
+                updateTaskProgress();
+            }, 15000); // Every 15 seconds
+
+            // Simulate progress bar updates
+            setInterval(() => {
+                updateProgressBars();
+            }, 30000); // Every 30 seconds
+        }
+
+        function updateTaskProgress() {
+            // Simulate AI task progress updates
+            const progressUpdates = [
+                { taskId: 2, progress: Math.floor(Math.random() * 30) + 40, output: '正在分析市場競爭對手...' },
+                { taskId: 2, progress: Math.floor(Math.random() * 30) + 70, output: '技術可行性評估中...' },
+                { taskId: 2, progress: 90, output: '整合分析結果...' }
+            ];
+
+            const randomUpdate = progressUpdates[Math.floor(Math.random() * progressUpdates.length)];
+
+            // Update the task card if exists
+            const taskCard = document.querySelector(`[data-task-id="${randomUpdate.taskId}"]`);
+            if (taskCard && randomUpdate.taskId === 2) {
+                const taskOutput = taskCard.querySelector('.task-output');
+                if (taskOutput) {
+                    taskOutput.innerHTML = `
+                        <strong>目前:</strong> ${randomUpdate.output}<br>
+                        <strong>進度:</strong> ${randomUpdate.progress}%
+                    `;
+                    taskCard.classList.add('fade-in');
+                    setTimeout(() => taskCard.classList.remove('fade-in'), 300);
+                }
+            }
+        }
+
+        function updateProgressBars() {
+            // Update overall progress
+            const progressFill = document.querySelector('.progress-fill');
+            if (progressFill) {
+                const currentWidth = parseInt(progressFill.style.width) || 40;
+                const newWidth = Math.min(currentWidth + Math.floor(Math.random() * 5), 100);
+                progressFill.style.width = newWidth + '%';
+                progressFill.textContent = newWidth + '%';
+            }
+        }
+
+        // Collapsible Sections
+        function initializeCollapsibleSections() {
+            document.querySelectorAll('.collapse-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const card = this.closest('.card');
+                    card.classList.toggle('collapsed');
+                    this.textContent = card.classList.contains('collapsed') ? '▶' : '▼';
+                });
+            });
+        }
+
+        // Task Completion Animation
+        function animateTaskCompletion(taskId) {
+            const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (taskCard) {
+                taskCard.classList.add('completed');
+                setTimeout(() => {
+                    taskCard.classList.remove('completed');
+                }, 500);
+            }
+        }
+
+        // Initialize all enhanced features
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            initializeDragAndDrop();
+            initializeKeyboardShortcuts();
+            initializeRealTimeUpdates();
+            initializeCollapsibleSections();
+            loadUserEnvironmentInfo();
+
+            console.log('✅ Enhanced interactive features loaded');
+            console.log('💡 Press ? for keyboard shortcuts');
+        });
+
+        // Load and display user environment information
+        function loadUserEnvironmentInfo() {
+            try {
+                const onboardingData = localStorage.getItem('userOnboardingData');
+                if (onboardingData) {
+                    const userData = JSON.parse(onboardingData);
+
+                    // Update transparency info
+                    const devToolDisplay = document.getElementById('devToolDisplay');
+                    const projectPathDisplay = document.getElementById('projectPathDisplay');
+                    const projectIdeaDisplay = document.getElementById('projectIdeaDisplay');
+
+                    if (devToolDisplay) {
+                        devToolDisplay.textContent = getDevToolLabel(userData.devTool) || 'VS Code + Claude Code';
+                    }
+
+                    if (projectPathDisplay) {
+                        projectPathDisplay.textContent = userData.projectPath || '未設置專案路徑';
+                    }
+
+                    if (projectIdeaDisplay) {
+                        const idea = userData.projectIdea || userData.projectDescription || '';
+                        projectIdeaDisplay.textContent = idea.length > 60 ? idea.substring(0, 60) + '...' : idea;
+                    }
+
+                    // Update task guidance
+                    updateTaskGuidance(userData);
+                } else {
+                    // User hasn't completed onboarding
+                    showOnboardingReminder();
+                }
+            } catch (error) {
+                console.error('❌ Failed to load user environment:', error);
+            }
+        }
+
+        function getDevToolLabel(tool) {
+            const labels = {
+                'vscode-claude': 'VS Code + Claude Code',
+                'cursor': 'Cursor IDE',
+                'copilot': 'VS Code + GitHub Copilot',
+                'other-ai': '其他 AI IDE',
+                'traditional': '傳統開發環境'
+            };
+            return labels[tool] || tool;
+        }
+
+        function updateTaskGuidance(userData) {
+            // Update brainstorming guidance
+            const tool1Display = document.getElementById('tool1Display');
+            const path1Display = document.getElementById('path1Display');
+
+            if (tool1Display) {
+                tool1Display.textContent = getDevToolLabel(userData.devTool) || 'VS Code + Claude Code';
+            }
+
+            if (path1Display) {
+                path1Display.textContent = userData.projectPath || '你的專案資料夾';
+            }
+
+            // Update guidance based on tool
+            const guidanceDiv = document.getElementById('brainstormingGuidance');
+            if (guidanceDiv && userData.devTool) {
+                const toolSpecificGuidance = getToolSpecificGuidance(userData.devTool);
+                guidanceDiv.innerHTML = toolSpecificGuidance.replace('{path}', userData.projectPath || '你的專案資料夾');
+            }
+        }
+
+        function getToolSpecificGuidance(tool) {
+            const guidance = {
+                'vscode-claude': `
+                    <strong>執行方式：</strong>在 VS Code + Claude Code 中執行：<br>
+                    <code style="background: white; padding: 2px 6px; border-radius: 3px;">/brainstorming "專案想法"</code><br>
+                    <strong>專案位置：</strong>{path}<br>
+                    <strong>預計時間：</strong>20-30 分鐘<br>
+                    <strong>完成後：</strong>回到這裡點選「完成構思」
+                `,
+                'cursor': `
+                    <strong>執行方式：</strong>在 Cursor 中使用 AI 聊天功能：<br>
+                    <code style="background: white; padding: 2px 6px; border-radius: 3px;">幫我進行專案構思：專案想法</code><br>
+                    <strong>專案位置：</strong>{path}<br>
+                    <strong>預計時間：</strong>15-25 分鐘<br>
+                    <strong>完成後：</strong>回到這裡更新結果
+                `,
+                'copilot': `
+                    <strong>執行方式：</strong>使用 GitHub Copilot Chat：<br>
+                    <code style="background: white; padding: 2px 6px; border-radius: 3px;">幫我分析這個專案想法：專案描述</code><br>
+                    <strong>專案位置：</strong>{path}<br>
+                    <strong>預計時間：</strong>15-20 分鐘<br>
+                    <strong>完成後：</strong>回到這裡記錄分析結果
+                `,
+                'other-ai': `
+                    <strong>執行方式：</strong>在你的 AI IDE 中進行專案分析<br>
+                    <strong>專案位置：</strong>{path}<br>
+                    <strong>建議重點：</strong>可行性、技術棧、開發順序<br>
+                    <strong>完成後：</strong>回到這裡記錄關鍵洞察
+                `,
+                'traditional': `
+                    <strong>執行方式：</strong>手動規劃或在這裡記錄你的想法<br>
+                    <strong>專案位置：</strong>{path}<br>
+                    <strong>建議重點：</strong>目標、用戶、技術需求<br>
+                    <strong>完成後：</strong>填寫構思結果，進入下一步
+                `
+            };
+
+            return guidance[tool] || guidance['vscode-claude'];
+        }
+
+        function showOnboardingReminder() {
+            const transparencyInfo = document.querySelector('.transparency-info');
+            if (transparencyInfo) {
+                const reminder = document.createElement('div');
+                reminder.style.cssText = 'background: #fef3c7; padding: 10px; border-radius: 6px; margin-top: 10px;';
+                reminder.innerHTML = `
+                    <strong>⚠️ 尚未完成設置：</strong><br>
+                    <a href="onboarding.html" style="color: #059669; font-weight: bold;">前往完成設置</a>
+                    以獲得個人化的執行指引
+                `;
+                transparencyInfo.appendChild(reminder);
+            }
+        }
+
+        function markTaskComplete(taskType) {
+            if (confirm('確定已完成 ' + taskType + ' 嗎？\n\n這將更新專案進度並進入下一階段。')) {
+                // Update task status
+                alert('✅ ' + taskType + ' 已標記為完成\n\n專案進度已更新，下一步指引將會顯示。');
+
+                // Update progress tracker if available
+                if (window.skillsTracker) {
+                    skillsTracker.updateTaskStatus(1, 'completed', 'User confirmed completion');
+                }
+
+                // Refresh the page to show updated guidance
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            }
+        }
+
+        function viewBrainstormingResults() {
+            const onboardingData = localStorage.getItem('userOnboardingData');
+            if (onboardingData) {
+                const userData = JSON.parse(onboardingData);
+                const results = `
+📋 Brainstorming 結果查看
+========================
+
+專案：${userData.projectIdea || userData.projectDescription || '未設置'}
+
+【執行狀態】
+狀態：待在你的 ${getDevToolLabel(userData.devTool)} 中執行 /brainstorming
+專案位置：${userData.projectPath || '未設置'}
+
+【記錄結果】
+完成 brainstorming 後，請在下方記錄：
+- 核心洞察（3-5點）
+- 可行性評估
+- 技術建議
+- 下一步行動
+
+【儲存結果】
+這個對話框關閉後，你可以：
+1. 在你的開發工具中執行 brainstorming
+2. 將結果記錄在筆記本或專案文件中
+3. 回到儀表板繼續下一步
+                `;
+
+                alert(results);
+            } else {
+                alert('📋 請先完成 onboarding 設置以查看詳細結果。');
+            }
+        }
+
+        function openProjectFolder() {
+            const onboardingData = localStorage.getItem('userOnboardingData');
+            if (onboardingData) {
+                const userData = JSON.parse(onboardingData);
+                if (userData.projectPath) {
+                    // Try to open the folder
+                    if (navigator.platform.startsWith('Win')) {
+                        // Windows
+                        window.open('file:///' + userData.projectPath.replace(/\\/g, '/'));
+                    } else {
+                        // Mac/Linux
+                        window.open('file://' + userData.projectPath);
+                    }
+
+                    alert('📁 嘗試開啟專案資料夾：' + userData.projectPath + '\n\n如果沒有自動開啟，請手動前往該位置。');
+                } else {
+                    alert('⚠️ 尚未設置專案路徑，請先完成 onboarding。');
+                }
+            } else {
+                alert('⚠️ 請先完成 onboarding 設置。');
+            }
+        }
+    </script>
+
+    <script src="progress-tracker.js"></script>
+    <script>
+        // 頁面載入完成後的初始化
+        window.addEventListener('load', () => {
+            console.log('🎯 Skills 學習助手已載入');
+            console.log('📊 當前進度:', skillsTracker ? skillsTracker.calculateOverallProgress() + '%' : '載入中');
+            console.log('🎓 學習模式:', skillsTracker ? skillsTracker.userLevel : '載入中');
+            console.log('💡 你現在可以控制專案進度了！');
+        });
+
+        // 覆蓋原有的函數以使用進度追蹤系統
+        const originalRefreshTasks = window.refreshTasks;
+        window.refreshTasks = function() {
+            if (window.skillsTracker) {
+                const report = skillsTracker.generateProgressReport();
+
+                // 顯示更新後的狀態
+                alert(`🔄 AI 任務狀態更新:\n\n` +
+                    `當前任務: ${report.aiTasks.filter(t => t.status === 'in_progress').length} 個進行中\n` +
+                    `已完成: ${report.aiTasks.filter(t => t.status === 'completed').length} 個\n` +
+                    `等待中: ${report.aiTasks.filter(t => t.status === 'pending').length} 個`);
+            } else if (originalRefreshTasks) {
+                originalRefreshTasks();
+            }
+        };
+
+        const originalViewDetails = window.viewDetails;
+        window.viewDetails = function() {
+            if (window.skillsTracker) {
+                const report = skillsTracker.generateProgressReport();
+
+                let details = '📋 AI 任務詳細狀態:\n\n';
+
+                report.aiTasks.forEach(task => {
+                    details += `任務 #${task.id}: ${task.name}\n`;
+                    details += `狀態: ${getStatusEmoji(task.status)} ${task.status}\n`;
+                    details += `時間: ${task.startTime} - ${task.endTime || '進行中'}\n`;
+                    if (task.output) details += `產出: ${task.output}\n`;
+                    details += '\n';
+                });
+
+                alert(details);
+            } else if (originalViewDetails) {
+                originalViewDetails();
+            }
+        };
+
+        function getStatusEmoji(status) {
+            const emojis = {
+                'completed': '✅',
+                'in_progress': '🔄',
+                'pending': '⏳',
+                'ready': '🎯'
+            };
+            return emojis[status] || '❓';
+        }
+
+        // 覆蓋 exportProgress 函數
+        const originalExportProgress = window.exportProgress;
+        window.exportProgress = function() {
+            if (window.skillsTracker) {
+                skillsTracker.exportProgressReport();
+            } else if (originalExportProgress) {
+                originalExportProgress();
+            }
+        };
+
+        // 覆蓋 adjustPhase 函數
+        const originalAdjustPhase = window.adjustPhase;
+        window.adjustPhase = function() {
+            if (window.skillsTracker) {
+                const result = skillsTracker.advanceToNextPhase();
+
+                if (result.success) {
+                    alert(`✅ 進入 ${result.phase}\n\n` +
+                        `新的階段已經開始，標準化模板已更新。`);
+                } else {
+                    alert(`⚠️ 無法進入下一階段\n\n原因: ${result.reason}\n\n` +
+                        `請先完成當前階段的所有必要項目。`);
+                }
+            } else if (originalAdjustPhase) {
+                originalAdjustPhase();
+            }
+        };
+    </script>
+</body>
+</html>

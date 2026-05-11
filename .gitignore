@@ -31,3 +31,9 @@ simple-*.html
 # Development files
 start-dashboard.bat
 update-projects.bat
+.vercel
+
+# Auto-update system
+.last-scan-cache.json
+*.log
+watch-and-update.pid

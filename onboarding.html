@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills 學習助手 - 新用戶入門</title>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .onboarding-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-header h1 {
+            color: var(--primary-color);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        .progress-dot.completed {
+            background: var(--success-color);
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            margin-bottom: 20px;
+        }
+
+        .quiz-question {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .quiz-question h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-color);
+            background: #e0e7ff;
+        }
+
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .result-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .result-card h3 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+        }
+
+        .result-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .skill-recommendation {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .skill-recommendation h4 {
+            color: var(--primary-color);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .skill-recommendation ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .skill-recommendation li {
+            padding: 5px 0;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .skill-recommendation li:before {
+            content: "✓ ";
+            color: var(--success-color);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .tutorial-preview {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #f59e0b;
+            margin-bottom: 20px;
+        }
+
+        .tutorial-preview h4 {
+            color: #d97706;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .tutorial-preview p {
+            font-size: 14px;
+            color: #92400e;
+            margin-bottom: 0;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-animation {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-animation h2 {
+            color: var(--success-color);
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .success-animation p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="onboarding-card">
+            <!-- Welcome Screen -->
+            <div class="welcome-header">
+                <h1>🎯 Skills 學習助手</h1>
+                <p>歡迎！讓我們幫助你快速上手，開始你的學習之旅</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-dot active" data-step="1"></div>
+                <div class="progress-dot" data-step="2"></div>
+                <div class="progress-dot" data-step="3"></div>
+                <div class="progress-dot" data-step="4"></div>
+                <div class="progress-dot" data-step="5"></div>
+            </div>
+
+            <!-- Step 1: Introduction -->
+            <div class="step active" id="step1">
+                <h2>👋 歡迎來到 Skills 學習助手</h2>
+                <p>這是一個專為開發者和專案經理設計的透明化專案管理系統。我們結合了 Y Combinator 的標準化開發流程與 AI 輔助工具，讓你能夠：</p>
+
+                <div class="result-card">
+                    <div class="result-item">
+                        <span class="result-label">🔍 透明化追蹤</span>
+                        <span class="result-value">即時查看 AI 任務狀態</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">📊 標準化流程</span>
+                        <span class="result-value">遵循 YC 最佳實踐</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🎓 個人化學習</span>
+                        <span class="result-value">根據你的水準調整建議</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">🤖 智能輔助</span>
+                        <span class="result-value">保持控制權的 AI 合作</span>
+                    </div>
+                </div>
+
+                <div class="tutorial-preview">
+                    <h4>⏱️ 預計時間：3-5 分鐘</h4>
+                    <p>我們將通過 4 個簡單步驟了解你的需求，並為你設置最佳的學習環境。</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="nextStep()">開始設置 →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Skill Assessment -->
+            <div class="step" id="step2">
+                <h2>📈 技能評估</h2>
+                <p>讓我們了解你的技術背景，以便提供個人化的建議。</p>
+
+                <div class="quiz-container">
+                    <div class="quiz-question">
+                        <h3>1. 你的開發經驗如何？</h3>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="selectOption(this, 'experience', 'beginner')">
+                                新手 - 我剛開始學習程式開發
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'experience', 'intermediate')">
+                                中級 - 我有一些專案經驗
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'experience', 'advanced')">
+                                高級 - 我有多年開發經驗
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>2. 你最熟悉的技術領域是？</h3>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="selectOption(this, 'domain', 'frontend')">
+                                前端開發 (Web, Mobile)
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'domain', 'backend')">
+                                後端開發 (API, Database)
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'domain', 'fullstack')">
+                                全端開發
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'domain', 'other')">
+                                其他領域
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h3>3. 你希望主要使用這個系統來？</h3>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="selectOption(this, 'goal', 'learning')">
+                                學習新的開發技能
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'goal', 'productivity')">
+                                提高專案開發效率
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'goal', 'management')">
+                                管理開發團隊和專案
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'goal', 'startup')">
+                                創業 - 快速驗證想法
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                    <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Project Setup -->
+            <div class="step" id="step3">
+                <h2>🚀 專案與工具設置</h2>
+                <p>告訴我們你的開發環境和專案資訊，我們會提供精確的執行指引。</p>
+
+                <div class="setup-form">
+                    <!-- Project Idea -->
+                    <div class="form-group">
+                        <label for="projectIdea">你的專案想法 *（或選擇下方建議）</label>
+                        <textarea id="projectIdea" placeholder="簡單描述你的專案想法，例如：我想建立一個幫助人記錄學習進度的 Web 應用..."></textarea>
+                        <div class="form-hint">
+                            💡 <strong>沒想法？</strong> <a href="#" onclick="showYCRecommendations(); return false;">選擇 YC 推薦的練習專案</a>
+                        </div>
+                    </div>
+
+                    <!-- Development Tool -->
+                    <div class="form-group">
+                        <label for="devTool">主要開發工具 *</label>
+                        <select id="devTool" onchange="updateToolGuidance()">
+                            <option value="vscode-claude">VS Code + Claude Code</option>
+                            <option value="cursor">Cursor IDE</option>
+                            <option value="copilot">VS Code + GitHub Copilot</option>
+                            <option value="other-ai">其他 AI 輔助 IDE</option>
+                            <option value="traditional">傳統開發環境</option>
+                        </select>
+                        <div class="form-hint" id="toolGuidance">
+                            ✅ 推薦選項：支援最完整的 superpowers + gstack 整合
+                        </div>
+                    </div>
+
+                    <!-- Project Path -->
+                    <div class="form-group">
+                        <label for="projectPath">專案檔案位置 *</label>
+                        <input type="text" id="projectPath" placeholder="C:\Users\YourName\Projects\MyProject">
+                        <div class="form-hint">
+                            📁 專案資料夾的完整路徑，系統會提供精確的檔案操作指引
+                        </div>
+                    </div>
+
+                    <!-- Current Phase -->
+                    <div class="form-group">
+                        <label for="currentPhase">專案狀態</label>
+                        <select id="currentPhase" onchange="updatePhaseGuidance()">
+                            <option value="idea">💡 只有想法 - 還沒開始</option>
+                            <option value="planning">📋 規劃階段 - 設計架構中</option>
+                            <option value="development">💻 開發階段 - 正在實作</option>
+                            <option value="testing">🧪 測試階段 - 驗證功能</option>
+                            <option value="deployment">🚀 部署階段 - 準備上線</option>
+                        </select>
+                        <div class="form-hint" id="phaseGuidance">
+                            系統會根據階段提供適當的執行指引
+                        </div>
+                    </div>
+
+                    <!-- Tech Stack (Optional) -->
+                    <div class="form-group">
+                        <label for="techStack">技術棧 (選填)</label>
+                        <input type="text" id="techStack" placeholder="例如：React, Node.js, PostgreSQL">
+                        <div class="form-hint">
+                            🔧 已決定的技術可加快開發，未決定也沒關係
+                        </div>
+                    </div>
+
+                    <!-- GitHub (Optional) -->
+                    <div class="form-group">
+                        <label for="githubRepo">GitHub Repository (選填)</label>
+                        <input type="text" id="githubRepo" placeholder="username/repository">
+                        <div class="form-hint">
+                            🌟 如果有 repo，系統可以整合 issue 追蹤和版本控制
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                    <button class="btn btn-primary" onclick="validateStep3()">下一步 →</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Goal Setting -->
+            <div class="step" id="step4">
+                <h2>🎯 目標設定</h2>
+                <p>設定明確的目標可以幫助我們提供更準確的建議。</p>
+
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label for="primaryGoal">主要目標 (選一個)</label>
+                        <select id="primaryGoal">
+                            <option value="mvp">快速構建 MVP</option>
+                            <option value="learning">學習新技術</option>
+                            <option value="improvement">改進現有專案</option>
+                            <option value="collaboration">團隊協作</option>
+                            <option value="deployment">部署上線</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timeframe">期望時間框架</label>
+                        <select id="timeframe">
+                            <option value="1week">1 週內</option>
+                            <option value="2weeks">2 週內</option>
+                            <option value="1month">1 個月內</option>
+                            <option value="3months">3 個月內</option>
+                            <option value="ongoing">長期專案</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="skillLevel">你希望學習的重點</label>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="selectOption(this, 'focus', 'planning')">
+                                專案規劃和設計
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'focus', 'development')">
+                                開發技能和最佳實踐
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'focus', 'testing')">
+                                測試和品質保證
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(this, 'focus', 'deployment')">
+                                部署和運維
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additionalGoals">其他目標 (選填)</label>
+                        <textarea id="additionalGoals" placeholder="還有其他特定目標或需求嗎？"></textarea>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                    <button class="btn btn-primary" onclick="completeOnboarding()">完成設置 →</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Results -->
+            <div class="step" id="step5">
+                <div class="success-animation">
+                    <div class="success-icon">✅</div>
+                    <h2>設置完成！</h2>
+                    <p>你的個人化學習環境已經準備好了</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>📊 你的個人檔案</h3>
+                    <div id="userProfileResults"></div>
+                </div>
+
+                <div class="skill-recommendation">
+                    <h4>🎯 個人化建議</h4>
+                    <ul id="personalizedRecommendations"></ul>
+                </div>
+
+                <div class="result-card">
+                    <h3>🎓 建議學習路徑</h3>
+                    <div id="learningPathResults"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="goToDashboard()">
+                        前往儀表板 →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="progress-tracker.js"></script>
+    <script src="skill-integration.js"></script>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        const userResponses = {};
+
+        function updateProgressIndicator() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index + 1 === currentStep) {
+                    dot.classList.add('active');
+                } else if (index + 1 < currentStep) {
+                    dot.classList.add('completed');
+                }
+            });
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            updateProgressIndicator();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function selectOption(element, category, value) {
+            // Remove selection from siblings
+            const parent = element.parentElement;
+            parent.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Add selection to clicked option
+            element.classList.add('selected');
+
+            // Store response
+            userResponses[category] = value;
+        }
+
+        function validateStep2() {
+            const required = ['experience', 'domain', 'goal'];
+            const missing = required.filter(field => !userResponses[field]);
+
+            if (missing.length > 0) {
+                alert('請回答所有問題以繼續');
+                return false;
+            }
+            return true;
+        }
+
+        function showYCRecommendations() {
+            const recommendations = `
+🎯 Y Combinator 推薦練習專案
+=====================================
+
+💡 **入門級專案**（適合新手）
+────────────────────────────
+1. 📝 **Todo List 應用**
+   • 學習：CRUD 操作、資料持久化
+   • 技能：基礎前端框架、本地儲存
+
+2. ⏰ **Pomodoro 計時器**
+   • 學習：計時邏輯、通知系統
+   • 技能：時間處理、使用者體驗
+
+3. 🌤️ **天氣預報 App**
+   • 學習：API 整合、資料處理
+   • 技能：外部 API、錯誤處理
+
+4. 💬 **簡易聊天室**
+   • 學習：即時通訊、狀態管理
+   • 技能：WebSocket、資料同步
+
+🚀 **進階專案**（有經驗者）
+────────────────────────────
+5. 📊 **個人財務追蹤器**
+   • 挑戰：資料視覺化、複雜查詢
+   • 學習：資料分析、圖表製作
+
+6. 📚 **學習管理系統**
+   • 挑戰：使用者認證、進度追蹤
+   • 學習：系統設計、權限管理
+
+7. 🛒 **小型電商平台**
+   • 挑戰：購物車、訂單處理
+   • 學習：支付整合、庫存管理
+
+8. 📱 **社群媒體 Dashboard**
+   • 挑戰：API 整合、即時更新
+   • 學習：第三方整合、效能優化
+
+💡 **選擇建議**
+────────────────────────────
+• 新手：選擇 1-4 號專案
+• 有經驗：選擇 5-8 號專案
+• 時間：預計 2-4 週完成
+• 目標：專注於學習，不是完美
+
+請選擇一個專案編號，或點選「取消」自行定義：
+            `;
+
+            const choice = prompt(recommendations + "\n\n輸入專案編號 (1-8)，或點選取消自行定義：");
+            if (choice && choice >= 1 && choice <= 8) {
+                const projectIdeas = {
+                    '1': 'Todo List 應用 - 一個可以管理日常任務的清單應用，支援新增、編輯、刪除和標記完成',
+                    '2': 'Pomodoro 計時器 - 25分鐘工作、5分鐘休息的生產力計時器，含統計圖表',
+                    '3': '天氣預報 App - 顯示當地和搜尋城市的天氣預報，整合天氣 API',
+                    '4': '簡易聊天室 - 即時通訊應用，支援多房間和即時訊息',
+                    '5': '個人財務追蹤器 - 記錄收入支出，產生統計圖表和預算建議',
+                    '6': '學習管理系統 - 追蹤學習進度、課程安排和成就系統',
+                    '7': '小型電商平台 - 商品展示、購物車、訂單管理的電商網站',
+                    '8': '社群媒體 Dashboard - 整合多個社群平台的統一管理介面'
+                };
+
+                document.getElementById('projectIdea').value = projectIdeas[choice];
+            }
+        }
+
+        function updateToolGuidance() {
+            const tool = document.getElementById('devTool').value;
+            const guidance = document.getElementById('toolGuidance');
+
+            const toolMessages = {
+                'vscode-claude': '✅ 推薦選項：支援最完整的 superpowers + gstack 整合',
+                'cursor': '🚀 優秀選擇：內建 AI 功能，支援大部分技能',
+                'copilot': '👍 好的選擇：GitHub Copilot 可輔助程式碼撰寫',
+                'other-ai': '🔧 可行選擇：部分 AI 功能可能需要手動整合',
+                'traditional': '💪 傳統方式：可以完全手動控制，但缺少 AI 輔助'
+            };
+
+            guidance.textContent = toolMessages[tool] || '';
+        }
+
+        function updatePhaseGuidance() {
+            const phase = document.getElementById('currentPhase').value;
+            const guidance = document.getElementById('phaseGuidance');
+
+            const phaseMessages = {
+                'idea': '🌱 系統將引導你從 brainstorming 開始，將想法轉化為具體專案定義',
+                'planning': '📋 系統將協助你建立詳細的實作計畫和技術架構',
+                'development': '💻 系統將追蹤開發進度，提供 TDD 和除錯指引',
+                'testing': '🧪 系統將幫助你進行系統化測試和品質驗證',
+                'deployment': '🚀 系統將引導你完成部署和上線準備'
+            };
+
+            guidance.textContent = phaseMessages[phase] || '';
+        }
+
+        function validateStep3() {
+            const projectIdea = document.getElementById('projectIdea').value.trim();
+            const devTool = document.getElementById('devTool').value;
+            const projectPath = document.getElementById('projectPath').value.trim();
+
+            if (!projectIdea) {
+                alert('請填寫專案想法或選擇 YC 推薦專案');
+                return false;
+            }
+
+            if (!projectPath) {
+                alert('請填寫專案檔案位置');
+                return false;
+            }
+
+            // Basic path validation
+            if (!projectPath.includes(':\\') && !projectPath.includes('/') && !projectPath.includes('~')) {
+                alert('專案路徑格式不正確，請填寫完整路徑，例如：C:\\Projects\\MyProject');
+                return false;
+            }
+
+            userResponses.projectIdea = projectIdea;
+            userResponses.devTool = devTool;
+            userResponses.projectPath = projectPath;
+            userResponses.currentPhase = document.getElementById('currentPhase').value;
+            userResponses.techStack = document.getElementById('techStack').value;
+            userResponses.githubRepo = document.getElementById('githubRepo').value;
+
+            // Generate project name from idea if not provided
+            if (!userResponses.projectName) {
+                userResponses.projectName = projectIdea.split(' - ')[0].substring(0, 30);
+            }
+            userResponses.projectDescription = projectIdea;
+
+            return true;
+        }
+
+        function validateStep4() {
+            userResponses.primaryGoal = document.getElementById('primaryGoal').value;
+            userResponses.timeframe = document.getElementById('timeframe').value;
+            userResponses.additionalGoals = document.getElementById('additionalGoals').value;
+
+            if (!userResponses.primaryGoal) {
+                alert('請選擇主要目標');
+                return false;
+            }
+
+            return true;
+        }
+
+        function completeOnboarding() {
+            // Validate current step
+            if (currentStep === 2 && !validateStep2()) return;
+            if (currentStep === 3 && !validateStep3()) return;
+            if (currentStep === 4 && !validateStep4()) return;
+
+            // Save user responses
+            localStorage.setItem('userOnboardingData', JSON.stringify(userResponses));
+
+            // Generate personalized results
+            generatePersonalizedResults();
+
+            // Move to results step
+            currentStep = 5;
+            showStep(currentStep);
+        }
+
+        function generatePersonalizedResults() {
+            // Display user profile
+            const profileHTML = `
+                <div class="result-item">
+                    <span class="result-label">經驗水準</span>
+                    <span class="result-value">${getExperienceLabel(userResponses.experience)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">專業領域</span>
+                    <span class="result-value">${getDomainLabel(userResponses.domain)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">主要目標</span>
+                    <span class="result-value">${getGoalLabel(userResponses.goal)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">開發工具</span>
+                    <span class="result-value">${getDevToolLabel(userResponses.devTool)}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">專案路徑</span>
+                    <span class="result-value">${userResponses.projectPath || '未設置'}</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">專案想法</span>
+                    <span class="result-value">${userResponses.projectIdea ? userResponses.projectIdea.substring(0, 50) + '...' : '未設置'}</span>
+                </div>
+            `;
+            document.getElementById('userProfileResults').innerHTML = profileHTML;
+
+            // Generate personalized recommendations
+            const recommendations = generateRecommendations();
+            const recommendationsHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+            document.getElementById('personalizedRecommendations').innerHTML = recommendationsHTML;
+
+            // Generate learning path
+            const learningPath = generateLearningPath();
+            const learningPathHTML = learningPath.map((step, index) => `
+                <div class="result-item">
+                    <span class="result-label">步驟 ${index + 1}</span>
+                    <span class="result-value">${step}</span>
+                </div>
+            `).join('');
+            document.getElementById('learningPathResults').innerHTML = learningPathHTML;
+
+            // Update skills tracker with user level
+            if (window.skillsTracker) {
+                skillsTracker.userLevel = userResponses.experience || 'intermediate';
+                skillsTracker.saveProgress();
+            }
+        }
+
+        function getExperienceLabel(level) {
+            const labels = {
+                'beginner': '🌱 新手',
+                'intermediate': '🌿 中級',
+                'advanced': '🌳 高級'
+            };
+            return labels[level] || level;
+        }
+
+        function getDomainLabel(domain) {
+            const labels = {
+                'frontend': '💻 前端開發',
+                'backend': '⚙️ 後端開發',
+                'fullstack': '🔧 全端開發',
+                'other': '🎯 其他領域'
+            };
+            return labels[domain] || domain;
+        }
+
+        function getGoalLabel(goal) {
+            const labels = {
+                'learning': '📚 學習新技能',
+                'productivity': '⚡ 提高效率',
+                'management': '👥 專案管理',
+                'startup': '🚀 創業項目'
+            };
+            return labels[goal] || goal;
+        }
+
+        function getDevToolLabel(tool) {
+            const labels = {
+                'vscode-claude': '💻 VS Code + Claude Code',
+                'cursor': '🚀 Cursor IDE',
+                'copilot': '👥 VS Code + GitHub Copilot',
+                'other-ai': '🔧 其他 AI IDE',
+                'traditional': '💪 傳統開發環境'
+            };
+            return labels[tool] || tool;
+        }
+
+        function generateRecommendations() {
+            const recommendations = [];
+            const level = userResponses.experience || 'intermediate';
+            const domain = userResponses.domain || 'fullstack';
+            const devTool = userResponses.devTool || 'vscode-claude';
+
+            // Tool-specific guidance
+            const toolGuidance = {
+                'vscode-claude': '在 VS Code 中直接使用 /brainstorming 開始你的專案分析',
+                'cursor': '在 Cursor 中使用 AI 聊天功能進行專案構思',
+                'copilot': '使用 GitHub Copilot Chat 輔助專案規劃和程式碼撰寫',
+                'other-ai': '在你的 AI IDE 中使用類似的 AI 輔助功能',
+                'traditional': '手動規劃後再使用 IDE 開發，或在這裡記錄你的想法'
+            };
+
+            recommendations.push(toolGuidance[devTool]);
+
+            // Level-based recommendations
+            if (level === 'beginner') {
+                recommendations.push('📖 先使用 YC 標準模板確保專案結構完整');
+                recommendations.push('🎯 一次專注一個技能，不要急著同時做多件事');
+                recommendations.push('📚 每完成一個階段，花時間理解學到的經驗');
+            } else if (level === 'advanced') {
+                recommendations.push('⚡ 可以同時進行多個階段的規劃，提高效率');
+                recommendations.push('🔧 自訂你的工作流程和技能模板');
+                recommendations.push('🚀 建立自動化流程，重複使用成功模式');
+            } else {
+                recommendations.push('⚖️ 平衡學習和實作，不要急於求成');
+                recommendations.push('📋 遵循標準流程，但依情況靈活調整');
+            }
+
+            // Project location reminder
+            if (userResponses.projectPath) {
+                recommendations.push(`📁 你的專案位於：${userResponses.projectPath}`);
+                recommendations.push('💡 儀表板會提供精確的檔案操作指引');
+            }
+
+            return recommendations.slice(0, 6); // Max 6 recommendations
+        }
+
+        function generateLearningPath() {
+            const level = userResponses.experience || 'intermediate';
+            const goal = userResponses.primaryGoal || 'mvp';
+
+            const paths = {
+                'beginner': [
+                    '學習使用 brainstorming 進行專案構思',
+                    '掌握標準化的專案規劃流程',
+                    '開始第一個小功能的 TDD 開發',
+                    '學習基本的除錯和測試方法'
+                ],
+                'intermediate': [
+                    '優化 brainstorming 產出，制定詳細計畫',
+                    '實作功能並建立測試覆蓋',
+                    '使用 systematic debugging 處理問題',
+                    '整合進度追蹤和版本控制'
+                ],
+                'advanced': [
+                    '並行處理多個開發任務',
+                    '建立自動化測試和部署流程',
+                    '使用進階的 AI 輔助功能',
+                    '優化開發流程和團隊協作'
+                ]
+            };
+
+            return paths[level] || paths['intermediate'];
+        }
+
+        function goToDashboard() {
+            // Redirect to main dashboard
+            window.location.href = 'skills-assistant-dashboard.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 Onboarding loaded');
+
+            // Check if user already completed onboarding
+            const savedData = localStorage.getItem('userOnboardingData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.projectName) {
+                    console.log('✅ User already completed onboarding');
+                    // Could auto-redirect or offer option to skip
+                }
+            }
+        });
+    </script>
+</body>
+</html>

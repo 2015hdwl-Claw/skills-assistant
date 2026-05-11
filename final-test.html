@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Integration Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .test-section { background: #2d2d2d; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { border-left: 4px solid #4ade80; }
+        .error { border-left: 4px solid #f87171; }
+        .info { border-left: 4px solid #60a5fa; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        pre { background: #1a1a1a; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Final Integration Test</h1>
+    <div>
+        <button onclick="runAllTests()">執行完整測試</button>
+        <button onclick="clearResults()">清除結果</button>
+    </div>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+
+            let contentHtml = '';
+            if (typeof content === 'object') {
+                contentHtml = `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            } else {
+                contentHtml = `<p>${content}</p>`;
+            }
+
+            div.innerHTML = `<strong>${title}</strong>${contentHtml}`;
+            results.appendChild(div);
+        }
+
+        async function runAllTests() {
+            results.innerHTML = '';
+            addResult('🚀 開始完整整合測試', { status: 'Initializing...' }, 'info');
+
+            try {
+                // Test 1: JavaScript 基本功能
+                addResult('✅ Test 1: JavaScript 基本功能', { status: 'PASS' }, 'success');
+
+                // Test 2: 檔案存取
+                addResult('🔍 Test 2: 檔案存取測試', { status: 'Testing file access...' }, 'info');
+
+                const [socialRes, admissionRes] = await Promise.all([
+                    fetch('./social_PROGRESS.json'),
+                    fetch('./admission-master_PROGRESS.json')
+                ]);
+
+                if (socialRes.ok && admissionRes.ok) {
+                    addResult('✅ Test 2: 檔案存取', { status: 'PASS', social: socialRes.status, admission: admissionRes.status }, 'success');
+                } else {
+                    addResult('❌ Test 2: 檔案存取', { status: 'FAIL', social: socialRes.status, admission: admissionRes.status }, 'error');
+                }
+
+                // Test 3: Script 載入
+                addResult('🔍 Test 3: Script 載入測試', { status: 'Loading scripts...' }, 'info');
+
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = './project-scanner.js';
+                    script.onload = () => {
+                        addResult('✅ Test 3: Script 載入', { status: 'PASS' }, 'success');
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        addResult('❌ Test 3: Script 載入', { status: 'FAIL' }, 'error');
+                        resolve();
+                    };
+                    document.head.appendChild(script);
+                });
+
+                // Test 4: 類別實例化
+                setTimeout(async () => {
+                    try {
+                        if (typeof RealProjectScanner !== 'undefined') {
+                            const scanner = new RealProjectScanner();
+                            addResult('✅ Test 4: 類別實例化', { status: 'PASS', class: 'RealProjectScanner' }, 'success');
+
+                            // Test 5: 專案掃描
+                            addResult('🔍 Test 5: 專案掃描測試', { status: 'Scanning projects...' }, 'info');
+
+                            const projects = await scanner.scanAllProjects();
+
+                            if (projects.length > 0) {
+                                addResult('✅ Test 5: 專案掃描', {
+                                    status: 'PASS',
+                                    project_count: projects.length,
+                                    projects: projects.map(p => ({
+                                        name: p.displayName,
+                                        phase: p.currentPhase,
+                                        progress: p.progress + '%'
+                                    }))
+                                }, 'success');
+
+                                // Test 6: 資料完整性
+                                const allValid = projects.every(p =>
+                                    p.name && p.displayName && p.currentPhase && typeof p.progress === 'number'
+                                );
+
+                                if (allValid) {
+                                    addResult('✅ Test 6: 資料完整性', { status: 'PASS', all_projects_valid: true }, 'success');
+                                } else {
+                                    addResult('❌ Test 6: 資料完整性', { status: 'FAIL', some_projects_invalid: true }, 'error');
+                                }
+
+                            } else {
+                                addResult('⚠️ Test 5: 專案掃描', { status: 'WARNING', no_projects_found: true, using_sample_data: true }, 'info');
+                            }
+
+                            addResult('🎉 測試完成', { status: 'ALL TESTS COMPLETED' }, 'success');
+
+                        } else {
+                            addResult('❌ Test 4: 類別實例化', { status: 'FAIL', class_not_found: true }, 'error');
+                        }
+                    } catch (error) {
+                        addResult('❌ 測試失敗', { error: error.message, stack: error.stack }, 'error');
+                    }
+                }, 500);
+
+            } catch (error) {
+                addResult('❌ 測試執行錯誤', { error: error.message, stack: error.stack }, 'error');
+            }
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+
+        // 錯誤捕獲
+        window.addEventListener('error', (e) => {
+            addResult(`🚨 全局錯誤`, { message: e.message, file: e.filename, line: e.lineno }, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            addResult(`🚨 Promise 錯誤`, { reason: e.reason }, 'error');
+        });
+    </script>
+</body>
+</html>

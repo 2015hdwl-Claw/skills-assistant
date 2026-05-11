@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Test</title>
+    <style>body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }</style>
+</head>
+<body>
+    <h1>🧪 Minimal Dashboard Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.style.padding = '10px';
+            div.style.margin = '5px 0';
+            div.style.borderLeft = `4px solid ${type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#60a5fa'}`;
+            div.style.background = '#2d2d2d';
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        log('✅ 頁面基本載入成功', 'success');
+
+        // 測試基本 JavaScript 功能
+        try {
+            const test = { a: 1, b: 2 };
+            log(`✅ JavaScript 基本功能正常: ${JSON.stringify(test)}`, 'success');
+        } catch (error) {
+            log(`❌ JavaScript 基本功能失敗: ${error.message}`, 'error');
+        }
+
+        // 測試 fetch API
+        async function testFetch() {
+            try {
+                const response = await fetch('./social_PROGRESS.json');
+                if (response.ok) {
+                    log('✅ Fetch API 正常工作', 'success');
+                } else {
+                    log(`❌ Fetch API 失敗: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Fetch API 錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        testFetch();
+
+        // 測試載入外部 script
+        function testScriptLoad() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = './project-scanner.js';
+                script.onload = () => {
+                    log('✅ project-scanner.js 載入成功', 'success');
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    log('❌ project-scanner.js 載入失敗', 'error');
+                    resolve(false);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        async function testAll() {
+            await testScriptLoad();
+
+            setTimeout(() => {
+                try {
+                    if (typeof RealProjectScanner !== 'undefined') {
+                        log('✅ RealProjectScanner 類別可用', 'success');
+
+                        const scanner = new RealProjectScanner();
+                        log('✅ RealProjectScanner 實例化成功', 'success');
+
+                        // 測試簡單的方法
+                        if (typeof scanner.scanAllProjects === 'function') {
+                            log('✅ scanAllProjects 方法可用', 'success');
+                        } else {
+                            log('❌ scanAllProjects 方法不可用', 'error');
+                        }
+
+                    } else {
+                        log('❌ RealProjectScanner 類別不可用', 'error');
+                    }
+                } catch (error) {
+                    log(`❌ 測試過程出錯: ${error.message}`, 'error');
+                    console.error(error);
+                }
+            }, 500);
+        }
+
+        testAll();
+
+        // 捕獲錯誤
+        window.addEventListener('error', (e) => {
+            log(`🚨 錯誤: ${e.message} (${e.filename}:${e.lineno})`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            log(`🚨 Promise 錯誤: ${e.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

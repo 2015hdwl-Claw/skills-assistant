@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-11T00:34:40.831Z",
+  "generatedAt": "2026-05-11T00:45:15.134Z",
   "totalProjects": 3,
   "projects": [
     {
@@ -9,7 +9,7 @@
       "path": "C:\\Users\\ntpud\\.claude\\projects\\admission-master",
       "type": "standard-format",
       "currentPhase": "Phase 3 - 開發執行 (功能融合策略)",
-      "progress": 65,
+      "progress": 80,
       "phases": [
         {
           "id": "PHASE_1",

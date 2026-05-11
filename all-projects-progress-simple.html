@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有專案進度總覽 - 簡化版</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+        .project-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .project-progress {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 1s ease;
+        }
+        .project-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-in_progress { background: #fef3c7; color: #92400e; }
+        .status-planning { background: #f3e8ff; color: #6b21a8; }
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 所有專案進度總覽</h1>
+        <p>專案規劃大師專用的進度追蹤儀表板</p>
+    </div>
+
+    <div id="loading" class="loading">
+        <p>正在載入專案資料...</p>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid"></div>
+
+    <script>
+        async function loadProjects() {
+            try {
+                const response = await fetch('./all-projects-index.json');
+                const indexData = await response.json();
+
+                console.log('載入的專案數量:', indexData.projects.length);
+
+                const container = document.getElementById('projectsGrid');
+                document.getElementById('loading').style.display = 'none';
+
+                indexData.projects.forEach(project => {
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+
+                    const statusClass = `status-${project.status}`;
+                    const statusText = {
+                        'completed': '已完成',
+                        'in_progress': '進行中',
+                        'planning': '規劃中'
+                    }[project.status] || project.status;
+
+                    card.innerHTML = `
+                        <div class="project-title">${project.displayName}</div>
+                        <div class="project-progress">
+                            <span>整體進度</span>
+                            <span>${project.progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${project.progress}%"></div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>當前階段:</strong> ${project.currentPhase || '未知'}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <strong>專案類型:</strong> ${project.type === 'standard' ? '標準化' : '個別'}
+                        </div>
+                        <span class="project-status ${statusClass}">${statusText}</span>
+                    `;
+
+                    // 添加点击事件
+                    card.addEventListener('click', () => {
+                        window.location.href = `project-detail.html?project=${encodeURIComponent(project.name)}`;
+                    });
+
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('載入失敗:', error);
+                document.getElementById('loading').innerHTML = `
+                    <p>❌ 載入失敗: ${error.message}</p>
+                `;
+            }
+        }
+
+        window.addEventListener('load', loadProjects);
+    </script>
+</body>
+</html>

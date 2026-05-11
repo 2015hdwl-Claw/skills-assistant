@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有專案進度總覽 - 完整版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .search-input {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            width: 250px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            background: #f3f4f6;
+            color: #666;
+            border: 2px solid #e5e7eb;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .project-title-section {
+            flex: 1;
+        }
+
+        .project-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .project-id {
+            font-size: 0.8em;
+            color: #999;
+            font-family: monospace;
+        }
+
+        .project-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .project-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-standard { background: #dbeafe; color: #1e40af; }
+        .badge-individual { background: #d1fae5; color: #065f46; }
+        .badge-completed { background: #dcfce7; color: #166534; }
+        .badge-in_progress { background: #fef3c7; color: #92400e; }
+        .badge-planning { background: #f3e8ff; color: #6b21a8; }
+        .badge-unknown { background: #f3f4f6; color: #4b5563; }
+
+        .project-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin: 15px 0;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .progress-section {
+            margin: 20px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .phase-timeline {
+            margin: 15px 0;
+        }
+
+        .phase-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #444;
+            font-size: 0.95em;
+        }
+
+        .phase-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            padding: 8px;
+            border-radius: 6px;
+            background: #f9fafb;
+            transition: background 0.2s ease;
+        }
+
+        .phase-item:hover {
+            background: #f3f4f6;
+        }
+
+        .phase-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .phase-dot.completed { background: #10b981; }
+        .phase-dot.in_progress { background: #f59e0b; }
+        .phase-dot.not_started { background: #d1d5db; }
+
+        .phase-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .phase-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .phase-progress {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .project-meta {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #f3f4f6;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .source-files {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .source-tag {
+            background: #f3f4f6;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            color: #667eea;
+            font-size: 0.8em;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .project-card:hover .click-hint {
+            opacity: 1;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        .error-state {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            color: #7f1d1d;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .compare-view {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .compare-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
+        }
+
+        .compare-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .compare-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .compare-label {
+            min-width: 180px;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .compare-bars {
+            flex: 1;
+        }
+
+        .compare-bar {
+            height: 24px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .compare-bar-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .scan-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid #3b82f6;
+            color: #1e3a8a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 所有專案進度總覽</h1>
+        <p>完整監控所有專案的 YC 5-Phase 開發進度與狀況</p>
+    </div>
+
+    <div id="app">
+        <!-- 統計概覽 -->
+        <div class="stats-overview" id="statsOverview">
+            <div class="stat-card">
+                <div class="stat-label">總專案數</div>
+                <div class="stat-value" id="totalProjects">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">平均進度</div>
+                <div class="stat-value" id="avgProgress">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">進行中專案</div>
+                <div class="stat-value" id="activeProjects">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">已完成專案</div>
+                <div class="stat-value" id="completedProjects">-</div>
+            </div>
+        </div>
+
+        <!-- 掃描資訊 -->
+        <div class="scan-info" id="scanInfo" style="display: none;">
+            <strong>📁 掃描範圍:</strong> C:\Users\ntpud\.claude\projects |
+            <strong>最後更新:</strong> <span id="scanTime">-</span> |
+            <strong>專案類型:</strong> 標準化專案 + 個別專案
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="control-group">
+                <input type="text" class="search-input" placeholder="搜尋專案名稱、描述..." id="searchInput">
+                <div class="filter-group">
+                    <button class="filter-btn active" onclick="filterByStatus('all', this)">全部</button>
+                    <button class="filter-btn" onclick="filterByStatus('in_progress', this)">進行中</button>
+                    <button class="filter-btn" onclick="filterByStatus('completed', this)">已完成</button>
+                    <button class="filter-btn" onclick="filterByStatus('planning', this)">規劃中</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <button onclick="refreshData()">🔄 重新載入</button>
+                <button onclick="rescanProjects()">🔍 重新掃描</button>
+                <button onclick="toggleCompareView()">📊 比較視圖</button>
+                <button onclick="exportData()">💾 匯出資料</button>
+            </div>
+        </div>
+
+        <!-- 比較視圖 -->
+        <div class="compare-view" id="compareView" style="display: none;">
+            <div class="compare-title">📊 專案進度比較</div>
+            <div class="compare-chart" id="compareChart"></div>
+        </div>
+
+        <!-- 載入狀態 -->
+        <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>正在載入專案資料...</p>
+        </div>
+
+        <!-- 錯誤狀態 -->
+        <div class="error-state" id="errorState" style="display: none;">
+            <h3>❌ 載入失敗</h3>
+            <p id="errorMessage">無法載入專案資料，請稍後再試。</p>
+            <button onclick="refreshData()">🔄 重新載入</button>
+        </div>
+
+        <!-- 專案卡片網格 -->
+        <div class="projects-grid" id="projectsGrid"></div>
+    </div>
+
+    <script>
+        let allProjects = [];
+        let filteredProjects = [];
+        let currentFilter = 'all';
+        let compareViewVisible = false;
+
+        // 頁面載入時自動執行
+        window.addEventListener('load', async () => {
+            await loadAllProjects();
+        });
+
+        // 載入所有專案資料
+        async function loadAllProjects() {
+            showLoading();
+
+            try {
+                console.log('🔍 載入專案索引...');
+                const response = await fetch('./all-projects-index.json');
+
+                if (!response.ok) {
+                    throw new Error('無法載入專案索引檔案');
+                }
+
+                const indexData = await response.json();
+                console.log(`✅ 成功載入 ${indexData.projects.length} 個專案`);
+
+                allProjects = indexData.projects;
+                filteredProjects = [...allProjects];
+
+                hideLoading();
+                updateScanInfo(indexData.generatedAt);
+                updateStats();
+                renderProjects();
+                updateCompareView();
+
+            } catch (error) {
+                console.error('❌ 載入專案失敗:', error);
+
+                // 如果索引檔案不存在，使用舊的掃描器作為備案
+                try {
+                    console.log('🔄 嘗試使用舊的掃描器...');
+                    const script = document.createElement('script');
+                    script.src = 'project-scanner.js';
+                    script.onload = async () => {
+                        const scanner = new RealProjectScanner();
+                        allProjects = await scanner.scanAllProjects();
+                        filteredProjects = [...allProjects];
+
+                        // 標準化格式
+                        allProjects = allProjects.map(project => ({
+                            id: project.name,
+                            name: project.name,
+                            displayName: project.displayName,
+                            path: project.name,
+                            type: 'individual',
+                            currentPhase: project.currentPhase,
+                            progress: project.progress,
+                            phases: project.phases || [],
+                            lastUpdated: project.lastUpdated,
+                            description: project.planSummary || '無詳細描述',
+                            sourceFiles: ['scanner'],
+                            status: determineStatusFromProgress(project.progress)
+                        }));
+
+                        filteredProjects = [...allProjects];
+                        hideLoading();
+                        updateStats();
+                        renderProjects();
+                        updateCompareView();
+                    };
+                    document.head.appendChild(script);
+                } catch (fallbackError) {
+                    console.error('❌ 備案方案也失敗:', fallbackError);
+                    showError('無法載入專案資料。請確保已執行 scan-all-projects.js 生成索引檔案。');
+                }
+            }
+        }
+
+        // 決定狀態
+        function determineStatusFromProgress(progress) {
+            if (progress >= 100) return 'completed';
+            if (progress > 0) return 'in_progress';
+            return 'planning';
+        }
+
+        // 更新掃描資訊
+        function updateScanInfo(generatedAt) {
+            const scanInfo = document.getElementById('scanInfo');
+            const scanTime = document.getElementById('scanTime');
+
+            scanTime.textContent = new Date(generatedAt).toLocaleString('zh-TW');
+            scanInfo.style.display = 'block';
+        }
+
+        // 更新統計資料
+        function updateStats() {
+            const totalProjects = filteredProjects.length;
+            const projectsWithProgress = filteredProjects.filter(p => p.progress > 0);
+            const avgProgress = projectsWithProgress.length > 0
+                ? Math.round(projectsWithProgress.reduce((sum, p) => sum + p.progress, 0) / projectsWithProgress.length)
+                : 0;
+
+            const activeProjects = filteredProjects.filter(p => p.status === 'in_progress').length;
+            const completedProjects = filteredProjects.filter(p => p.status === 'completed').length;
+
+            animateNumber('totalProjects', totalProjects);
+            animateNumber('avgProgress', avgProgress, '%');
+            animateNumber('activeProjects', activeProjects);
+            animateNumber('completedProjects', completedProjects);
+        }
+
+        // 數字動畫
+        function animateNumber(elementId, targetValue, suffix = '') {
+            const element = document.getElementById(elementId);
+            const startValue = parseInt(element.textContent) || 0;
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
+                element.textContent = currentValue + suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+
+            requestAnimationFrame(updateNumber);
+        }
+
+        // 渲染專案卡片
+        function renderProjects() {
+            const container = document.getElementById('projectsGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            let displayProjects = filteredProjects;
+
+            // 搜尋過濾
+            if (searchTerm) {
+                displayProjects = displayProjects.filter(project => {
+                    const nameMatch = project.name.toLowerCase().includes(searchTerm);
+                    const displayNameMatch = project.displayName.toLowerCase().includes(searchTerm);
+                    const descMatch = project.description && project.description.toLowerCase().includes(searchTerm);
+                    return nameMatch || displayNameMatch || descMatch;
+                });
+            }
+
+            container.innerHTML = '';
+
+            if (displayProjects.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
+                        <h3>未找到符合條件的專案</h3>
+                        <p>請嘗試其他搜尋條件或篩選選項</p>
+                    </div>
+                `;
+                return;
+            }
+
+            displayProjects.forEach((project, index) => {
+                const card = createProjectCard(project, index);
+                container.appendChild(card);
+            });
+        }
+
+        // 創建專案卡片
+        function createProjectCard(project, index) {
+            const card = document.createElement('div');
+            card.className = 'project-card';
+            card.style.animationDelay = `${index * 0.05}s`;
+
+            const statusBadge = getStatusBadge(project.status);
+            const typeBadge = getTypeBadge(project.type);
+            const phasesHtml = renderPhaseTimeline(project);
+
+            card.innerHTML = `
+                <div class="project-header">
+                    <div class="project-title-section">
+                        <div class="project-title">${project.displayName || project.name}</div>
+                        <div class="project-id">${project.id}</div>
+                    </div>
+                    <div class="project-badges">
+                        ${typeBadge}
+                        ${statusBadge}
+                    </div>
+                </div>
+
+                ${project.description ? `
+                    <div class="project-description">
+                        ${project.description.substring(0, 150)}${project.description.length > 150 ? '...' : ''}
+                    </div>
+                ` : ''}
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span>整體進度</span>
+                        <span>${project.progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${project.progress}%"></div>
+                    </div>
+                </div>
+
+                ${phasesHtml}
+
+                <div class="project-meta">
+                    <div class="meta-item">
+                        <span>🎯 當前: ${project.currentPhase || '未知'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📁 類型: ${project.type === 'standard' ? '標準化' : '個別'}</span>
+                    </div>
+                </div>
+
+                <div class="source-files">
+                    ${project.sourceFiles.map(file => `<span class="source-tag">${file}</span>`).join('')}
+                </div>
+
+                <div class="click-hint">👆 點擊查看詳情</div>
+            `;
+
+            // 添加點擊事件
+            card.addEventListener('click', () => {
+                window.location.href = `project-detail.html?project=${encodeURIComponent(project.name)}`;
+            });
+
+            return card;
+        }
+
+        // 渲染階段時間軸
+        function renderPhaseTimeline(project) {
+            if (!project.phases || project.phases.length === 0) {
+                return '';
+            }
+
+            const phases = project.phases.slice(0, 4); // 只顯示前 4 個階段
+            return `
+                <div class="phase-timeline">
+                    <div class="phase-title">📋 階段進度</div>
+                    ${phases.map(phase => `
+                        <div class="phase-item">
+                            <div class="phase-dot ${phase.status}"></div>
+                            <div class="phase-info">
+                                <span class="phase-name">${phase.name}</span>
+                                <span class="phase-progress">${phase.progress}%</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${project.phases.length > 4 ? `<div style="text-align: center; color: #999; font-size: 0.85em; padding: 5px;">+${project.phases.length - 4} 個階段</div>` : ''}
+                </div>
+            `;
+        }
+
+        // 獲得狀態徽章
+        function getStatusBadge(status) {
+            const badges = {
+                'completed': '<span class="project-badge badge-completed">已完成</span>',
+                'in_progress': '<span class="project-badge badge-in_progress">進行中</span>',
+                'planning': '<span class="project-badge badge-planning">規劃中</span>',
+                'unknown': '<span class="project-badge badge-unknown">未知</span>'
+            };
+            return badges[status] || badges.unknown;
+        }
+
+        // 獲得類型徽章
+        function getTypeBadge(type) {
+            return type === 'standard'
+                ? '<span class="project-badge badge-standard">標準化</span>'
+                : '<span class="project-badge badge-individual">個別</span>';
+        }
+
+        // 篩選功能
+        function filterByStatus(status, button) {
+            currentFilter = status;
+
+            // 更新按鈕狀態
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // 執行篩選
+            if (status === 'all') {
+                filteredProjects = [...allProjects];
+            } else {
+                filteredProjects = allProjects.filter(p => p.status === status);
+            }
+
+            updateStats();
+            renderProjects();
+            updateCompareView();
+        }
+
+        // 更新比較視圖
+        function updateCompareView() {
+            const container = document.getElementById('compareChart');
+            container.innerHTML = '';
+
+            const sortedProjects = [...filteredProjects].sort((a, b) => b.progress - a.progress).slice(0, 10);
+
+            sortedProjects.forEach(project => {
+                const row = document.createElement('div');
+                row.className = 'compare-row';
+
+                row.innerHTML = `
+                    <div class="compare-label">${project.displayName || project.name}</div>
+                    <div class="compare-bars">
+                        <div class="compare-bar" style="width: ${project.progress}%">
+                            <span class="compare-bar-value">${project.progress}%</span>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        // 切換比較視圖
+        function toggleCompareView() {
+            const compareView = document.getElementById('compareView');
+            compareViewVisible = !compareViewVisible;
+            compareView.style.display = compareViewVisible ? 'block' : 'none';
+        }
+
+        // 顯示載入狀態
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('projectsGrid').innerHTML = '';
+        }
+
+        // 隱藏載入狀態
+        function hideLoading() {
+            document.getElementById('loadingState').style.display = 'none';
+        }
+
+        // 顯示錯誤
+        function showError(message) {
+            hideLoading();
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // 重新載入資料
+        async function refreshData() {
+            await loadAllProjects();
+        }
+
+        // 重新掃描專案
+        function rescanProjects() {
+            alert('要重新掃描專案，請在命令行中執行: node scan-all-projects.js');
+        }
+
+        // 匯出資料
+        function exportData() {
+            const dataStr = JSON.stringify(filteredProjects, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `projects-progress-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 搜尋功能
+        document.getElementById('searchInput').addEventListener('input', () => {
+            renderProjects();
+        });
+
+        // 鍵盤快捷鍵
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' && e.ctrlKey) {
+                e.preventDefault();
+                refreshData();
+            }
+            if (e.key === 'f' && e.ctrlKey) {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+    </script>
+</body>
+</html>
